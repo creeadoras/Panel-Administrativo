@@ -1,261 +1,284 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<title>Cree Adoras — Colaboradores</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cree Adoras — Sistema Premium</title>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<link rel="stylesheet" href="styles.css" />
-
-</head>
-
-<body>
-
-<div id="root"></div>
-
-
-
-
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
 <style>
-
-
-.top-actions{
-  display:flex;
-  justify-content:flex-end;
-  margin-bottom:22px;
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg,#f6f1eb,#efe4d8);color:#2d241f;}
+.app{min-height:100vh;display:flex;}
+.sidebar{width:290px;background:linear-gradient(180deg,#c89b6d,#b98558);border-right:1px solid rgba(255,255,255,.2);padding:26px;display:flex;flex-direction:column;gap:28px;position:fixed;left:0;top:0;bottom:0;z-index:1000;backdrop-filter:blur(18px);box-shadow:0 0 30px rgba(0,0,0,.12);}
+.sidebar-top{display:flex;justify-content:space-between;align-items:center;}
+.logo-title{font-size:24px;font-weight:800;color:white;}
+.logo-subtitle{opacity:.7;font-size:13px;margin-top:3px;color:white;}
+.nav{display:flex;flex-direction:column;gap:12px;}
+.nav-btn{width:100%;border:none;background:rgba(255,255,255,.18);color:white;padding:16px 18px;border-radius:18px;text-align:left;font-size:15px;font-weight:700;cursor:pointer;transition:.25s;backdrop-filter:blur(10px);}
+.nav-btn:hover{background:rgba(255,255,255,.3);}
+.nav-btn.active{background:linear-gradient(135deg,#ffffff,#f5ede4);color:#8a5a34;box-shadow:0 10px 25px rgba(0,0,0,.12);}
+.content{flex:1;margin-left:290px;padding:34px;display:flex;flex-direction:column;gap:24px;}
+.mobileHeader{display:none;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.mobileMenuBtn,.mobileClose{border:none;background:rgba(255,255,255,.08);color:white;width:46px;height:46px;border-radius:14px;cursor:pointer;font-size:20px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;}
+.card{background:rgba(255,255,255,.75);border:1px solid rgba(200,155,109,.18);border-radius:28px;padding:22px;backdrop-filter:blur(14px);box-shadow:0 10px 35px rgba(0,0,0,.06);}
+.title{font-size:28px;font-weight:800;}
+.subtitle{opacity:.7;margin-top:5px;font-size:14px;}
+.cliente{font-size:22px;font-weight:800;}
+.btn{border:none;padding:14px 18px;border-radius:16px;cursor:pointer;font-weight:700;transition:.2s;font-size:14px;}
+.btn:hover{transform:translateY(-2px);}
+.btn-green{background:linear-gradient(135deg,#c89b6d,#b98558);color:white;}
+.btn-primary{background:linear-gradient(135deg,#d6b08a,#c89b6d);color:white;}
+.btn-danger{background:linear-gradient(135deg,#b25d4f,#944538);color:white;}
+.btn-blue{background:linear-gradient(135deg,#6ea8d6,#4a8ec2);color:white;}
+.btn-purple{background:linear-gradient(135deg,#a98bd6,#8a6abf);color:white;}
+.btn-white{background:rgba(255,255,255,.9);color:#2d241f;border:1px solid rgba(185,133,88,.22);}
+.btn-ghost{background:rgba(255,255,255,.5);color:#2d241f;border:1px solid rgba(185,133,88,.18);}
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.input,textarea,select{width:100%;border:none;background:rgba(255,255,255,.92);color:#2d241f;padding:15px;border-radius:16px;margin-top:8px;outline:none;border:1px solid rgba(200,155,109,.18);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;}
+textarea{resize:vertical;}
+label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
+.modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999;}
+.modalContent{width:100%;max-height:92vh;overflow:auto;background:linear-gradient(180deg,#fffdfb,#f5ede4);border-radius:30px;padding:28px;color:#2d241f;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999;}
+.modal-box{width:100%;max-width:700px;max-height:92vh;overflow:auto;background:linear-gradient(180deg,#fffdfb,#f5ede4);border-radius:30px;padding:28px;color:#2d241f;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.flex-between{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px;}
+.section-title{font-size:22px;font-weight:800;color:#2f241d;}
+.checklist{display:flex;flex-direction:column;gap:18px;margin-top:8px;}
+.check-item{display:flex;align-items:flex-start;gap:16px;background:rgba(255,255,255,.7);border:1px solid rgba(185,133,88,.14);border-radius:20px;padding:18px;transition:.2s;}
+.check-item.ready{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.25);}
+.empty{text-align:center;padding:40px;opacity:.5;font-weight:600;font-size:16px;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px;}
+.stat{background:rgba(255,255,255,.75);border:1px solid rgba(200,155,109,.18);border-radius:28px;padding:28px 24px;backdrop-filter:blur(14px);box-shadow:0 10px 35px rgba(0,0,0,.06);}
+.stat-label{font-size:12px;font-weight:800;letter-spacing:1px;opacity:.55;margin-bottom:10px;}
+.stat-value{font-size:34px;font-weight:800;color:#b98558;}
+.presupuesto-card{
+  padding:22px;
 }
-
-.btn.danger{
-  background:#dc2626;
-}
-
-.image-viewer{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.72);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:80;
-  padding:24px;
-}
-
-.image-viewer-img{
-  max-width:min(920px,100%);
-  max-height:88vh;
-  object-fit:contain;
-  border-radius:18px;
-  background:white;
-}
-
-.image-viewer-close{
-  position:fixed;
-  top:18px;
-  right:18px;
-  width:44px;
-  height:44px;
-  border:none;
-  border-radius:14px;
-  background:white;
-  color:#2f241d;
-  font-size:28px;
-  cursor:pointer;
-}
-
-
-.material-card{
-  padding:14px;
-  border-radius:20px;
-}
-
-.material-img-button{
-  width:100%;
-  aspect-ratio:1 / 1;
-  border:none;
-  background:#f3ece4;
-  border-radius:16px;
-  overflow:hidden;
-  cursor:pointer;
-  margin-bottom:12px;
-  padding:0;
-}
-
-.material-img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-  background:#fffaf5;
-}
-
-.material-card .cliente{
-  font-size:15px;
-  font-weight:800;
-  line-height:1.25;
-}
-
-.material-card .stock{
-  font-size:14px;
-  margin-top:4px;
-}
-
-.material-card .actions{
-  gap:8px;
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-
-.material-card .btn{
-  padding:10px 12px;
-  border-radius:14px;
-  font-size:13px;
-}
-
-.materiales-grid{
-  grid-template-columns:repeat(auto-fit,minmax(170px,220px));
-  align-items:start;
-}
-
-
-.btn.danger{
-  background:#dc2626;
-}
-
-
-.search-bar{
-  margin-bottom:24px;
-}
-
-.search-bar input{
-  width:100%;
-  border:1px solid #e5d8ca;
-  border-radius:18px;
-  padding:16px 18px;
-  font:inherit;
-  background:white;
-  color:#2f241d;
-}
-
-.month-section{
-  margin-bottom:34px;
-}
-
-.month-title{
-  font-size:22px;
-  font-weight:800;
-  margin-bottom:16px;
-  text-transform:capitalize;
-}
-
-.affected-box{
-  margin-top:16px;
+.presupuesto-card-top{
   display:flex;
   flex-direction:column;
-  gap:10px;
-  padding-top:16px;
-  border-top:1px solid #f1e8de;
+  gap:16px;
+}
+.presupuesto-main-info{
+  display:grid;
+  grid-template-columns:54px 1fr;
+  gap:14px;
+  align-items:center;
+  min-width:0;
+}
+.presupuesto-card-logo{
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  object-fit:cover;
+  background:white;
+  padding:4px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+}
+.presupuesto-title-box{
+  min-width:0;
 }
 
-.affected-row{
+.presupuesto-card:hover{transform:translateY(-4px);box-shadow:0 20px 45px rgba(0,0,0,.08);}
+.presupuesto-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.presupuesto-logo{width:58px;height:58px;border-radius:18px;overflow:hidden;background:white;padding:5px;box-shadow:0 6px 18px rgba(0,0,0,.05);}
+.presupuesto-cliente{
+  font-size:24px;
+  font-weight:800;
+  line-height:1.12;
+  overflow-wrap:anywhere;
+}
+.presupuesto-meta{
+  margin-top:6px;
+  font-size:14px;
+  font-weight:700;
+  opacity:.55;
+}
+.presupuesto-price-box{
+  width:100%;
+  background:rgba(185,133,88,.12);
+  color:#b98558;
+  border-radius:18px;
+  padding:14px 16px;
+  font-size:24px;
+  font-weight:800;
+  text-align:right;
+  overflow-wrap:anywhere;
+}
+.presupuesto-info-grid{
+  margin-top:18px;
   display:grid;
-  grid-template-columns:1fr;
-  gap:4px;
-  background:#fffaf5;
-  border:1px solid #f1e8de;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.presupuesto-info-grid div{
+  background:rgba(255,255,255,.7);
+  border:1px solid rgba(185,133,88,.12);
   border-radius:16px;
   padding:12px;
 }
-
-.affected-row span{
-  color:#6f5a4a;
-  font-size:14px;
-}
-
-
-
-.btn.dark{
-  background:#6b4a36;
-}
-
-.btn.warning{
-  background:#e39a37;
-}
-
-.modal.wide{
-  width:min(760px,100%);
-}
-
-.control-list{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  max-height:55vh;
-  overflow:auto;
-  padding-right:4px;
-}
-
-.control-row{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
-  padding:14px;
-  border:1px solid #f1e8de;
-  border-radius:18px;
-  background:#fffaf5;
-}
-
-.control-row-title{
+.presupuesto-info-grid span{
+  display:block;
+  font-size:11px;
   font-weight:800;
+  text-transform:uppercase;
+  opacity:.5;
+  margin-bottom:5px;
 }
 
-.control-grid{
+.presupuesto-info-grid strong{
+  font-size:14px;
+  overflow-wrap:anywhere;
+}
+
+.presupuesto-progress-block{
+  margin-top:20px;
+}
+
+.presupuesto-actions-modern{
+  margin-top:22px;
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
 
-.control-grid label,
-.control-row label{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  font-weight:700;
+.presupuesto-actions-modern .btn{
+  min-height:58px;
 }
 
-.control-row input,
-.control-row textarea{
-  border:1px solid #e5d8ca;
-  border-radius:14px;
-  padding:10px;
-  font:inherit;
-  background:white;
-  color:#2f241d;
+.estado-movimientos{
+  margin-top:22px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
 }
 
-.control-row textarea{
-  min-height:74px;
-  resize:vertical;
+.movimiento-card{
+  min-height:84px;
+  text-align:center;
 }
 
+@media(max-width:520px){
+
+  .presupuesto-card{
+    padding:18px;
+  }
+
+  .presupuesto-cliente{
+    font-size:22px;
+  }
+
+  .presupuesto-price-box{
+    font-size:22px;
+    text-align:left;
+  }
+
+  .presupuesto-info-grid,
+  .estado-movimientos{
+    grid-template-columns:1fr;
+  }
+
+}
+.presupuesto-numero{margin-top:7px;opacity:.65;font-size:14px;font-weight:600;}
+.presupuesto-total{font-size:26px;font-weight:800;color:#b98558;white-space:nowrap;}
+.presupuesto-status-row{margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.estado-pill{padding:11px 16px;border-radius:999px;font-size:13px;font-weight:800;letter-spacing:.3px;}
+.estado-ok{background:rgba(34,197,94,.14);color:#16a34a;}
+.estado-pending{background:rgba(185,133,88,.12);color:#b98558;}
+.presupuesto-date{opacity:.7;font-size:14px;font-weight:600;}
+.progress-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14px;font-weight:700;}
+.timeline-modern{width:100%;height:16px;border-radius:999px;background:rgba(185,133,88,.12);overflow:hidden;}
+.timeline-modern-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#d6b08a,#b98558);transition:.3s;}
+.presupuesto-actions-modern{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.estado-movimientos{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.movimiento-card{background:rgba(255,255,255,.7);border:1px solid rgba(185,133,88,.12);border-radius:18px;padding:16px;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;transition:.2s;}
+.mov-dot{width:13px;height:13px;border-radius:999px;background:#d6b08a;}
+.mov-active{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);}
+.mov-active .mov-dot{background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.5);}
+.admin-list{display:flex;flex-direction:column;gap:16px;}
+.admin-row{background:rgba(255,255,255,.72);border:1px solid rgba(185,133,88,.12);border-radius:24px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:20px;transition:.2s;}
+.admin-row:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.06);}
+.admin-main{flex:1;display:flex;flex-direction:column;gap:10px;}
+.admin-title{font-size:22px;font-weight:800;color:#2f241d;}
+.admin-info{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;opacity:.8;}
+.admin-actions{display:flex;gap:10px;align-items:center;}
+.mini-badge{background:rgba(185,133,88,.12);color:#b98558;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+.items-editor{display:flex;flex-direction:column;gap:12px;margin-top:8px;}
+.item-row{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;background:rgba(255,255,255,.7);border:1px solid rgba(185,133,88,.14);border-radius:16px;padding:14px;}
+.item-row input{margin-top:0;padding:10px 14px;}
+@media(max-width:1024px){.content{padding:24px;}}
+@media(max-width:820px){
+  .sidebar{transform:translateX(-100%);transition:.3s;}
+  .sidebar.open{transform:translateX(0);}
+  .content{margin-left:0;padding:18px;}
+  .mobileHeader{display:flex;}
+  .title{font-size:24px;}
+  .grid{grid-template-columns:1fr;}
+  .topbar{flex-direction:column;align-items:flex-start;}
+}
+@media(max-width:640px){
+  .presupuesto-header{flex-direction:column;}
+  .presupuesto-total{font-size:24px;}
+  .presupuesto-cliente{font-size:22px;}
+  .presupuesto-actions-modern{grid-template-columns:1fr;}
+}
+@media(max-width:720px){
+  .admin-row{flex-direction:column;align-items:flex-start;}
+  .admin-actions{width:100%;}
+  .admin-actions button{flex:1;}
+}
+@media(max-width:520px){
+  .content{padding:14px;}
+  .card{padding:18px;border-radius:22px;}
+  .modalContent{padding:18px;border-radius:22px;}
+  .btn{width:100%;}
+  .actions{flex-direction:column;}
+  .title{font-size:22px;}
+  .cliente{font-size:19px;}
+}
+
+.presupuesto-actions-modern{
+  grid-template-columns:1fr 1fr 1fr;
+}
+
+.mov-warning{
+  background:rgba(227,154,55,.14);
+  border:1px solid rgba(227,154,55,.28);
+}
+
+.mov-warning .mov-dot{
+  background:#e39a37;
+}
+
+.faltantes-box{
+  margin-top:14px;
+  background:rgba(227,154,55,.1);
+  border:1px solid rgba(227,154,55,.25);
+  border-radius:18px;
+  padding:14px;
+}
+
+.faltante-row{
+  margin-top:8px;
+  font-size:14px;
+  opacity:.85;
+}
 
 .calendar-panel{
   background:white;
-  border-radius:28px;
-  padding:24px;
-  box-shadow:0 10px 30px rgba(0,0,0,.04);
+  border-radius:24px;
+  padding:20px;
 }
 
 .calendar-header{
@@ -319,505 +342,78 @@
   text-align:left;
 }
 
-.presupuesto-card.focused{
-  outline:3px solid #c99869;
-}
 
-
-.check-item{
-  display:grid;
-  grid-template-columns:1fr 36px;
-  align-items:center;
-  gap:10px;
-}
-
-.check-label{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width:0;
-}
-
-.check-label span{
-  overflow-wrap:anywhere;
-}
-
-.delete-item-btn{
-  width:36px;
-  height:36px;
-  border:none;
-  border-radius:12px;
-  background:#f3ece4;
-  color:#8a4b32;
-  font-size:22px;
-  line-height:1;
-  cursor:pointer;
-}
-
-.delete-item-btn:hover{
-  background:#f5d7c9;
-}
-
-
-.add-material-box{
-  margin-top:22px;
-  padding-top:18px;
-  border-top:1px solid #f1e8de;
-}
-
-.add-material-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 86px;
-  gap:10px;
+.selector-list{
   margin-top:12px;
-}
-
-.add-material-row select{
-  grid-column:1 / -1;
-}
-
-.add-material-row input{
-  min-width:0;
-}
-
-.add-material-row .btn{
-  width:100%;
-  min-width:0;
-  padding:12px 14px;
-}
-
-.add-material-row select,
-.add-material-row input{
-  border:1px solid #e5d8ca;
-  border-radius:16px;
-  padding:12px;
-  font:inherit;
-  background:#fffaf5;
-  color:#2f241d;
-  width:100%;
-}
-
-.upload-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border:none;
-  background:#d6b08a;
-  color:white;
-  padding:14px 18px;
-  border-radius:18px;
-  font-weight:700;
-  cursor:pointer;
-  width:max-content;
-}
-
-.upload-btn input{
-  display:none;
-}
-
-
-.modal-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(47,36,29,.45);
   display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  z-index:50;
-}
-
-.modal{
-  width:min(520px,100%);
-  background:white;
-  border-radius:28px;
-  padding:24px;
-  box-shadow:0 20px 60px rgba(0,0,0,.18);
-}
-
-.modal-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:20px;
-}
-
-.modal-header h2{
-  font-size:24px;
-}
-
-.modal-close{
-  border:none;
-  background:#f3ece4;
-  width:42px;
-  height:42px;
-  border-radius:14px;
-  font-size:26px;
-  cursor:pointer;
-}
-
-.form-field{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin-bottom:16px;
-  font-weight:700;
-}
-
-.form-field input{
-  border:1px solid #e5d8ca;
-  border-radius:16px;
-  padding:14px;
-  font:inherit;
-  color:#2f241d;
-  background:#fffaf5;
-}
-
-.btn:disabled{
-  opacity:.65;
-  cursor:not-allowed;
-}
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
-body{
-
-  font-family:
-  'Plus Jakarta Sans',
-  sans-serif;
-
-  background:#ece5dc;
-
-  color:#2f241d;
-
-}
-
-.app{
-
-  display:flex;
-
-  min-height:100vh;
-
-}
-
-.sidebar{
-
-  width:280px;
-
-  background:white;
-
-  padding:24px;
-
-  position:fixed;
-
-  left:0;
-
-  top:0;
-
-  height:100vh;
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:12px;
-
-}
-
-.sidebar button{
-
-  border:none;
-
-  background:#f3ece4;
-
-  padding:16px;
-
-  border-radius:18px;
-
-  font-weight:700;
-
-  cursor:pointer;
-
-}
-
-.sidebar button.active{
-
-  background:#c99869;
-
-  color:white;
-
-}
-
-.brand{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:14px;
-
-  margin-bottom:24px;
-
-  font-size:24px;
-
-  font-weight:800;
-
-}
-
-.brand img{
-
-  width:54px;
-
-  height:54px;
-
-  border-radius:18px;
-
-}
-
-.content{
-
-  flex:1;
-
-  margin-left:280px;
-
-  padding:34px;
-
-}
-
-.page-title{
-
-  font-size:34px;
-
-  font-weight:800;
-
-  margin-bottom:28px;
-
-}
-
-.stats-grid,
-.cards-grid,
-.calendar-grid{
-
-  display:grid;
-
-  grid-template-columns:
-  repeat(auto-fit,minmax(320px,1fr));
-
-  gap:22px;
-
-}
-
-.stat-card,
-.presupuesto-card,
-.material-card,
-.event-card{
-
-  background:white;
-
-  border-radius:28px;
-
-  padding:24px;
-
-  box-shadow:
-  0 10px 30px rgba(0,0,0,.04);
-
-}
-
-.timeline{
-
-  width:100%;
-
-  height:14px;
-
-  background:#f1e8de;
-
-  border-radius:999px;
-
-  overflow:hidden;
-
-  margin-top:18px;
-
-}
-
-.timeline-fill{
-
-  height:100%;
-
-  background:
-  linear-gradient(
-    90deg,
-    #d8b08b,
-    #ba8558
-  );
-
-}
-
-.checklist-list{
-
-  display:flex;
-
-  flex-direction:column;
-
+  flex-wrap:wrap;
   gap:10px;
-
-  margin-top:20px;
-
+  max-height:180px;
+  overflow:auto;
+  padding:4px;
 }
 
-.check-item{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-
-}
-
-.btn{
-
-  border:none;
-
-  background:#d6b08a;
-
-  color:white;
-
-  padding:14px 18px;
-
-  border-radius:18px;
-
-  font-weight:700;
-
+.selector-pill{
+  border:1px solid rgba(185,133,88,.18);
+  background:rgba(255,255,255,.75);
+  color:#2d241f;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:800;
   cursor:pointer;
-
 }
 
-.btn.green{
-
+.selector-pill.active{
   background:#22c55e;
-
-}
-
-.actions{
-
-  display:flex;
-
-  gap:12px;
-
-  margin-top:20px;
-
+  color:white;
+  border-color:#22c55e;
 }
 
 
-@media(max-width:900px){
-
-  .sidebar{
-
-    width:100%;
-
-    height:auto;
-
-    position:relative;
-
-    flex-direction:row;
-
-    overflow:auto;
-
-  }
-
-  .content{
-
-    margin-left:0;
-
-    padding:22px;
-
-  }
-
-  .app{
-
-    flex-direction:column;
-
-  }
-
+.estado-editor{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
 }
 
-@media(max-width:640px){
+.estado-editor span{
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  opacity:.55;
+}
 
-  .page-title{
-
-    font-size:26px;
-
-  }
-
-  .actions{
-
-    flex-direction:column;
-
-  }
-
+.estado-editor select{
+  margin-top:0;
+  background:white;
+  font-weight:800;
 }
 
 
 </style>
-
-
-<script>
-
-const SUPABASE_URL =
-"https://uarfndtspaejhddcnsxc.supabase.co";
-
-const SUPABASE_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcmZuZHRzcGFlamhkZGNuc3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTQ4MzEsImV4cCI6MjA5NDE5MDgzMX0.25YME3yryDqttRwX4JwKpmFHMlyoHYmNn31xlX-2zWc";
-
-const db =
-window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-
-</script>
-
+</head>
+<body>
+<div id="root"></div>
 <script type="text/babel">
+const { useState, useEffect, useMemo } = React;
 
-const {
-  useState,
-  useEffect
-} = React;
+const LOGO = "https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/logo.jpg";
+const SUPABASE_URL = "https://uarfndtspaejhddcnsxc.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcmZuZHRzcGFlamhkZGNuc3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTQ4MzEsImV4cCI6MjA5NDE5MDgzMX0.25YME3yryDqttRwX4JwKpmFHMlyoHYmNn31xlX-2zWc";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const LOGO =
-"https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/logo.jpg";
-
-function App(){
-
+function App() {
 
 const [busquedaMaterial,setBusquedaMaterial] =
 useState("");
 
-const [modalProveedor,setModalProveedor] =
+
+
+const [modalPresupuesto,setModalPresupuesto] =
 useState(false);
 
-const [proveedorEditando,setProveedorEditando] =
-useState(null);
-
-
-const [imagenAmpliada,setImagenAmpliada] =
-useState(null);
-
-
-const [materialAfectadoAbierto,setMaterialAfectadoAbierto] =
-useState(null);
-
-const [busquedaPresupuesto,setBusquedaPresupuesto] =
-useState("");
-
-
-const [controlModal,setControlModal] =
+const [presupuestoEditando,setPresupuestoEditando] =
 useState(null);
 
 
@@ -827,1884 +423,2339 @@ useState(()=>{
   return new Date(hoy.getFullYear(),hoy.getMonth(),1);
 });
 
-const [focusedPresupuestoId,setFocusedPresupuestoId] =
-useState(null);
+
+  const [section, setSection] = useState("dashboard");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Data
+  const [presupuestos, setPresupuestos] = useState([]);
+  const [materiales, setMateriales] = useState([]);
+  const [colaboradores, setColaboradores] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [presupuestosFormales, setPresupuestosFormales] = useState([]);
+  const [eventosCalendario, setEventosCalendario] = useState([]);
+
+  // Búsquedas
+  const [busqueda, setBusqueda] = useState("");
+  const [busquedaFormal, setBusquedaFormal] = useState("");
+
+  // Modales
+  const [modalChecklist, setModalChecklist] = useState(false);
+  const [presupuestoChecklist, setPresupuestoChecklist] = useState(null);
+
+  const [modalMaterial, setModalMaterial] = useState(false);
+  const [materialEditando, setMaterialEditando] = useState(null);
+
+  const [modalColaborador, setModalColaborador] = useState(false);
+  const [colaboradorEditando, setColaboradorEditando] = useState(null);
+
+  const [modalProveedor, setModalProveedor] = useState(false);
+  const [proveedorEditando, setProveedorEditando] = useState(null);
+
+  const [modalFormal, setModalFormal] = useState(false);
+  const [formalEditando, setFormalEditando] = useState(null);
+
+  const [modalImportar, setModalImportar] = useState(false);
+  const [modalEventosFecha, setModalEventosFecha] = useState(false);
+  const [eventosFecha, setEventosFecha] = useState([]);
+
+  const [imagenPreview, setImagenPreview] = useState(null);
+
+  useEffect(() => { cargarTodo(); }, []);
+
+  useEffect(() => {
+    if (section !== "dashboard") return;
+    setTimeout(() => {
+      const el = document.getElementById("calendar");
+      if (!el) return;
+      el.innerHTML = "";
+      const cal = new FullCalendar.Calendar(el, {
+        initialView: "dayGridMonth",
+        locale: "es",
+        height: "auto",
+        events: eventosCalendario,
+        headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek" },
+        eventClick(info) {
+          const fecha = info.event.startStr;
+          setEventosFecha(presupuestos.filter(p => p.fecha === fecha));
+          setModalEventosFecha(true);
+        },
+        dateClick(info) {
+          setEventosFecha(presupuestos.filter(p => p.fecha === info.dateStr));
+          setModalEventosFecha(true);
+        }
+      });
+      cal.render();
+    }, 100);
+  }, [section, eventosCalendario, presupuestos]);
 
 
-const [materialExtra,setMaterialExtra] =
-useState({});
+async function cargarFuenteTTF(doc,url,nombreFuente){
 
-const [cantidadExtra,setCantidadExtra] =
-useState({});
+  const res =
+  await fetch(url);
 
-const [imagenMaterialFile,setImagenMaterialFile] =
-useState(null);
+  const buffer =
+  await res.arrayBuffer();
 
-const [imagenMaterialPreview,setImagenMaterialPreview] =
-useState("");
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
 
-
-  const [section,setSection] =
-  useState("dashboard");
-
-  const [materiales,setMateriales] =
-  useState([]);
-
-  const [presupuestos,setPresupuestos] =
-  useState([]);
-
-  const [empresas,setEmpresas] =
-  useState([]);
-
-  const [loading,setLoading] =
-  useState(true);
-
-const [materialEditando,setMaterialEditando] =
-useState(null);
-
-const [materialForm,setMaterialForm] =
-useState({
-  nombre:"",
-  stock:"",
-  imagen:""
-});
-
-const [guardandoMaterial,setGuardandoMaterial] =
-useState(false);
-
-  useEffect(()=>{
-
-    cargarTodo();
-
-  },[]);
-
-
-
-function nuevaEmpresa(){
-
-  setProveedorEditando({
-    nombre:"",
-    telefono:"",
-    servicio:"",
-    precio:0
+  bytes.forEach(b=>{
+    binary += String.fromCharCode(b);
   });
 
-  setModalProveedor(true);
+  const base64 =
+  btoa(binary);
+
+  doc.addFileToVFS(
+    `${nombreFuente}.ttf`,
+    base64
+  );
+
+  doc.addFont(
+    `${nombreFuente}.ttf`,
+    nombreFuente,
+    "normal"
+  );
 
 }
 
-function editarEmpresa(empresa){
+async function cambiarEstadoPresupuesto(p, estado){
 
-  setProveedorEditando({
-    ...empresa
-  });
+  const { error } = await db
+  .from("presupuestos")
+  .update({
+    estado
+  })
+  .eq("id",p.id);
 
-  setModalProveedor(true);
-
-}
-
-async function guardarProveedor(){
-
-  const payload = {
-    nombre:proveedorEditando.nombre || "",
-    telefono:proveedorEditando.telefono || "",
-    servicio:proveedorEditando.servicio || "",
-    precio:Number(proveedorEditando.precio || 0)
-  };
-
-  let res;
-
-  if(proveedorEditando.id){
-
-    res = await db
-    .from("proveedores")
-    .update(payload)
-    .eq("id",proveedorEditando.id);
-
-  }else{
-
-    res = await db
-    .from("proveedores")
-    .insert(payload);
-
-  }
-
-  if(res.error){
-    alert("No se pudo guardar la empresa.");
-    console.error(res.error.message);
+  if(error){
+    alert("No se pudo actualizar el estado.");
+    console.error(error.message);
     return;
   }
 
-  setModalProveedor(false);
-  setProveedorEditando(null);
+  setPresupuestos(prev=>
+    prev.map(item=>
+      item.id === p.id
+      ? {
+          ...item,
+          estado
+        }
+      : item
+    )
+  );
+
+}
+
+function proximoNumeroPresupuesto(){
+
+  const maximo =
+  presupuestos.reduce((max,p)=>
+    Math.max(
+      max,
+      Number(p.numero || 0)
+    ),
+    0
+  );
+
+  return maximo + 1;
+
+}
+
+function nuevoPresupuestoInterno(){
+
+  setPresupuestoEditando({
+    cliente:"",
+    fecha:"",
+    salon:"",
+    numero:proximoNumeroPresupuesto(),
+    materiales:[],
+    checklist:[],
+    colaboradores:[],
+    proveedores:[],
+    total:0,
+    estado:"pendiente",
+    etapa:"pendiente_preparacion"
+  });
+
+  setModalPresupuesto(true);
+
+}
+
+
+function abrirEditarPresupuesto(p){
+
+  setPresupuestoEditando({
+    ...p,
+    materiales:p.materiales || [],
+    checklist:p.checklist || [],
+    colaboradores:p.colaboradores || [],
+    proveedores:p.proveedores || []
+  });
+
+  setModalPresupuesto(true);
+
+}
+
+function toggleProveedorPresupuesto(proveedor){
+
+  setPresupuestoEditando(prev=>{
+
+    const actuales =
+    prev.proveedores || [];
+
+    const existe =
+    actuales.some(e=>
+      String(e.id) === String(proveedor.id)
+    );
+
+    return {
+      ...prev,
+      proveedores:existe
+      ? actuales.filter(e=>
+          String(e.id) !== String(proveedor.id)
+        )
+      : [
+          ...actuales,
+          {
+            id:proveedor.id,
+            nombre:proveedor.nombre,
+            servicio:proveedor.servicio || "",
+            telefono:proveedor.telefono || "",
+            presente:false
+          }
+        ]
+    };
+
+  });
+
+}
+
+
+function toggleColaboradorPresupuesto(colaborador){
+
+  setPresupuestoEditando(prev=>{
+
+    const actuales =
+    prev.colaboradores || [];
+
+    const existe =
+    actuales.some(c=>
+      String(c.id) === String(colaborador.id)
+    );
+
+    return {
+      ...prev,
+      colaboradores:existe
+      ? actuales.filter(c=>
+          String(c.id) !== String(colaborador.id)
+        )
+      : [
+          ...actuales,
+          {
+            id:colaborador.id,
+            nombre:colaborador.nombre,
+            rol:colaborador.rol || "",
+            telefono:colaborador.telefono || ""
+          }
+        ]
+    };
+
+  });
+
+}
+
+function toggleEmpresaPresupuesto(empresa){
+
+  setPresupuestoEditando(prev=>{
+
+    const actuales =
+    prev.empresas || [];
+
+    const existe =
+    actuales.some(e=>
+      String(e.id) === String(empresa.id)
+    );
+
+    return {
+      ...prev,
+      empresas:existe
+      ? actuales.filter(e=>
+          String(e.id) !== String(empresa.id)
+        )
+      : [
+          ...actuales,
+          {
+            id:empresa.id,
+            nombre:empresa.nombre,
+            servicio:empresa.servicio || "",
+            telefono:empresa.telefono || "",
+            presente:false
+          }
+        ]
+    };
+
+  });
+
+}
+
+
+function actualizarCampoPresupuesto(campo,valor){
+
+  setPresupuestoEditando(prev=>({
+    ...prev,
+    [campo]:valor
+  }));
+
+}
+
+function agregarItemPresupuesto(){
+
+  setPresupuestoEditando(prev=>({
+    ...prev,
+    materiales:[
+      ...(prev.materiales || []),
+      {
+        id:"",
+        nombre:"",
+        cantidad:1,
+        precio:0
+      }
+    ]
+  }));
+
+}
+
+function actualizarItemPresupuesto(idx,campo,valor){
+
+  setPresupuestoEditando(prev=>{
+
+    const items =
+    [...(prev.materiales || [])];
+
+    items[idx] = {
+      ...items[idx],
+      [campo]:valor
+    };
+
+    if(campo === "id"){
+
+      const material =
+      materiales.find(m=>
+        String(m.id) === String(valor)
+      );
+
+      if(material){
+
+        items[idx] = {
+          ...items[idx],
+          id:material.id,
+          nombre:material.nombre,
+          precio:Number(material.precio || 0)
+        };
+
+      }
+
+    }
+
+    const total =
+    items.reduce((sum,item)=>
+      sum + (
+        Number(item.cantidad || 0) *
+        Number(item.precio || 0)
+      ),
+      0
+    );
+
+    return {
+  ...prev,
+  materiales:items,
+  total:recalcularTotalPresupuesto(
+    items,
+    prev.colaboradores || [],
+    prev.proveedores || []
+  )
+};
+
+  });
+
+}
+
+function eliminarItemPresupuesto(idx){
+
+  setPresupuestoEditando(prev=>{
+
+    const items =
+    (prev.materiales || [])
+    .filter((_,index)=>
+      index !== idx
+    );
+
+    const total =
+    items.reduce((sum,item)=>
+      sum + (
+        Number(item.cantidad || 0) *
+        Number(item.precio || 0)
+      ),
+      0
+    );
+
+    return {
+  ...prev,
+  materiales:items,
+  total:recalcularTotalPresupuesto(
+    items,
+    prev.colaboradores || [],
+    prev.proveedores || []
+  )
+};
+
+  });
+
+}
+
+
+function recalcularTotalPresupuesto(itemsMateriales, itemsColaboradores, itemsProveedores){
+
+  const totalMateriales =
+  (itemsMateriales || []).reduce((sum,item)=>
+    sum + Number(item.cantidad || 0) * Number(item.precio || 0),
+    0
+  );
+
+  const totalColaboradores =
+  (itemsColaboradores || []).reduce((sum,item)=>
+    sum + Number(item.cantidad || 0) * Number(item.precio || 0),
+    0
+  );
+
+  const totalProveedores =
+  (itemsProveedores || []).reduce((sum,item)=>
+    sum + Number(item.cantidad || 0) * Number(item.precio || 0),
+    0
+  );
+
+  return totalMateriales + totalColaboradores + totalProveedores;
+
+}
+
+function actualizarTotalesPresupuesto(cambios){
+
+  setPresupuestoEditando(prev=>{
+
+    const nuevo = {
+      ...prev,
+      ...cambios
+    };
+
+    return {
+      ...nuevo,
+      total:recalcularTotalPresupuesto(
+        nuevo.materiales || [],
+        nuevo.colaboradores || [],
+        nuevo.proveedores || []
+      )
+    };
+
+  });
+
+}
+
+function agregarColaboradorPresupuesto(){
+
+  actualizarTotalesPresupuesto({
+    colaboradores:[
+      ...(presupuestoEditando.colaboradores || []),
+      {
+        id:"",
+        nombre:"",
+        cantidad:1,
+        precio:0,
+        rol:"",
+        telefono:""
+      }
+    ]
+  });
+
+}
+
+function actualizarColaboradorPresupuesto(idx,campo,valor){
+
+  setPresupuestoEditando(prev=>{
+
+    const items =
+    [...(prev.colaboradores || [])];
+
+    items[idx] = {
+      ...items[idx],
+      [campo]:valor
+    };
+
+    if(campo === "id"){
+
+      const colaborador =
+      colaboradores.find(c=>
+        String(c.id) === String(valor)
+      );
+
+      if(colaborador){
+
+        items[idx] = {
+          ...items[idx],
+          id:colaborador.id,
+          nombre:colaborador.nombre,
+          rol:colaborador.rol || "",
+          telefono:colaborador.telefono || "",
+          precio:Number(colaborador.precio || colaborador.costo || items[idx].precio || 0)
+        };
+
+      }
+
+    }
+
+    return {
+      ...prev,
+      colaboradores:items,
+      total:recalcularTotalPresupuesto(
+        prev.materiales || [],
+        items,
+        prev.proveedores || []
+      )
+    };
+
+  });
+
+}
+
+function eliminarColaboradorPresupuesto(idx){
+
+  setPresupuestoEditando(prev=>{
+
+    const items =
+    (prev.colaboradores || [])
+    .filter((_,index)=>
+      index !== idx
+    );
+
+    return {
+      ...prev,
+      colaboradores:items,
+      total:recalcularTotalPresupuesto(
+        prev.materiales || [],
+        items,
+        prev.proveedores || []
+      )
+    };
+
+  });
+
+}
+
+function agregarProveedorPresupuesto(){
+
+  actualizarTotalesPresupuesto({
+    proveedores:[
+      ...(presupuestoEditando.proveedores || []),
+      {
+        id:"",
+        nombre:"",
+        cantidad:1,
+        precio:0,
+        servicio:"",
+        telefono:"",
+        presente:false
+      }
+    ]
+  });
+
+}
+
+function actualizarProveedorPresupuesto(idx,campo,valor){
+
+  setPresupuestoEditando(prev=>{
+
+    const items =
+    [...(prev.proveedores || [])];
+
+    items[idx] = {
+      ...items[idx],
+      [campo]:valor
+    };
+
+    if(campo === "id"){
+
+      const proveedor =
+      proveedores.find(p=>
+        String(p.id) === String(valor)
+      );
+
+      if(proveedor){
+
+        items[idx] = {
+          ...items[idx],
+          id:proveedor.id,
+          nombre:proveedor.nombre,
+          servicio:proveedor.servicio || "",
+          telefono:proveedor.telefono || "",
+          precio:Number(proveedor.precio || proveedor.costo || items[idx].precio || 0),
+          presente:items[idx].presente || false
+        };
+
+      }
+
+    }
+
+    return {
+      ...prev,
+      proveedores:items,
+      total:recalcularTotalPresupuesto(
+        prev.materiales || [],
+        prev.colaboradores || [],
+        items
+      )
+    };
+
+  });
+
+}
+
+function eliminarProveedorPresupuesto(idx){
+
+  setPresupuestoEditando(prev=>{
+
+    const items =
+    (prev.proveedores || [])
+    .filter((_,index)=>
+      index !== idx
+    );
+
+    return {
+      ...prev,
+      proveedores:items,
+      total:recalcularTotalPresupuesto(
+        prev.materiales || [],
+        prev.colaboradores || [],
+        items
+      )
+    };
+
+  });
+
+}
+
+
+async function guardarPresupuestoInterno(){
+
+  const materialesActuales =
+  presupuestoEditando.materiales || [];
+
+  const checklistActual =
+  presupuestoEditando.checklist || [];
+
+  const checklistNuevo =
+  materialesActuales.map(item=>{
+
+    const label =
+    `${item.cantidad}x ${item.nombre}`;
+
+    const existente =
+    checklistActual.find(ch=>
+      ch.material_id &&
+      String(ch.material_id) === String(item.id)
+    ) ||
+    checklistActual.find(ch=>
+      ch.label === label
+    );
+
+    return {
+      id:existente?.id || `m-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      material_id:item.id || existente?.material_id || "",
+      label,
+      ready:existente?.ready || false,
+      comentario:existente?.comentario || "",
+      cargado:existente?.cargado || false,
+      enviado:existente?.enviado || Number(item.cantidad || 1),
+      recibido:existente?.recibido || "",
+      regreso_ok:existente?.regreso_ok || false,
+      regreso_detalle:existente?.regreso_detalle || "",
+      stock_devuelto:existente?.stock_devuelto || false
+    };
+
+  });
+
+  const payload = {
+  cliente:presupuestoEditando.cliente || "",
+  fecha:presupuestoEditando.fecha || null,
+  salon:presupuestoEditando.salon || null,
+  numero:presupuestoEditando.numero
+    ? Number(presupuestoEditando.numero)
+    : proximoNumeroPresupuesto(),
+  materiales:materialesActuales,
+  checklist:checklistNuevo,
+  colaboradores:presupuestoEditando.colaboradores || [],
+  proveedores:presupuestoEditando.proveedores || [],
+  total:Number(presupuestoEditando.total || 0),
+  estado:presupuestoEditando.estado || "pendiente",
+  etapa:presupuestoEditando.etapa || "pendiente_preparacion"
+};
+
+  let res;
+
+if(presupuestoEditando.id){
+
+  res = await db
+  .from("presupuestos")
+  .update(payload)
+  .eq("id",presupuestoEditando.id);
+
+}else{
+
+  res = await db
+  .from("presupuestos")
+  .insert(payload);
+
+}
+
+if(res.error){
+  alert("No se pudo guardar el presupuesto.");
+  console.error(res.error.message);
+  return;
+}
+
+  setModalPresupuesto(false);
+  setPresupuestoEditando(null);
   cargarTodo();
 
 }
 
 
 
-function abrirNuevoMaterial(){
-
-  setMaterialEditando({
-    id:null,
-    nombre:"",
-    stock:"",
-    imagen:""
-  });
-
-  setMaterialForm({
-    nombre:"",
-    stock:"",
-    imagen:""
-  });
-
-  setImagenMaterialFile(null);
-  setImagenMaterialPreview("");
-
+function fechaKey(fecha){
+  return fecha ? String(fecha).slice(0,10) : "";
 }
 
-
-async function eliminarMaterial(material){
-
-  const confirmado =
-  window.confirm(
-    `¿Eliminar el material "${material.nombre}"?`
+function cambiarMes(offset){
+  setCalendarMonth(prev=>
+    new Date(prev.getFullYear(),prev.getMonth() + offset,1)
   );
+}
 
-  if(!confirmado){
+function estadoOperativo(p){
+  return p.estado || p.etapa || "pendiente";
+}
+
+function estaListoParaCargar(p){
+  return estadoOperativo(p) === "listo_para_cargar";
+}
+
+function estaDevueltoCorrecto(p){
+  return estadoOperativo(p) === "devuelto_correcto";
+}
+
+function estaDevueltoConFaltantes(p){
+  return estadoOperativo(p) === "regreso_con_observaciones";
+}
+
+function detallesRegreso(p){
+  return (p.checklist || [])
+  .filter(item=>!item.regreso_ok && item.regreso_detalle)
+  .map(item=>`${item.label}: ${item.regreso_detalle}`);
+}
+
+async function eliminarPresupuesto(id){
+
+  if(!confirm("¿Eliminar este presupuesto interno?")){
     return;
   }
 
-  const {
-    error
-  } = await db
-  .from("materiales")
+  const { error } = await db
+  .from("presupuestos")
   .delete()
-  .eq("id",material.id);
+  .eq("id",id);
 
   if(error){
-
-    console.error(
-      "Error eliminando material:",
-      error.message
-    );
-
-    alert("No se pudo eliminar el material.");
+    alert("No se pudo eliminar el presupuesto.");
+    console.error(error.message);
     return;
-
   }
 
-  setMateriales(prev=>
-    prev.filter(m=>
-      m.id !== material.id
-    )
-  );
-
-}
-
-function materialAfectadoEnPresupuestos(material){
-
-  return presupuestos
-  .map(p=>{
-
-    const items =
-    (p.checklist || [])
-    .filter(item=>{
-
-      const itemMaterialId =
-      item.material_id ||
-      item.id_material ||
-      item.materialId ||
-      item.id;
-
-      const coincidePorId =
-      String(itemMaterialId) === String(material.id);
-
-      const coincidePorNombre =
-      normalizarTexto(item.label)
-      .includes(
-        normalizarTexto(material.nombre)
-      );
-
-      return coincidePorId || coincidePorNombre;
-
-    });
-
-    if(items.length === 0){
-      return null;
-    }
-
-    return {
-      presupuesto:p,
-      items
-    };
-
-  })
-  .filter(Boolean);
-
-}
-
-function cantidadDesdeLabel(label){
-
-  const match =
-  String(label || "").match(/^(\d+)x\s/i);
-
-  return match
-  ? Number(match[1])
-  : 1;
-
-}
-
-function cantidadMaterialEnItem(item){
-
-  return Number(
-    item.cantidad ||
-    item.enviado ||
-    cantidadDesdeLabel(item.label)
-  );
-
-}
-
-  async function cargarTodo(){
-
-    setLoading(true);
-
-    const {
-      data:mat
-    } = await db
-    .from("materiales")
-    .select("*")
-    .order("id",{ascending:false});
-
-    const {
-  data:pres
-} = await db
-.from("presupuestos")
-.select("*")
-.order("fecha",{ascending:true})
-.order("id",{ascending:true});
-
-   
-
-    const {
-      data:emp
-    } = await db
-    .from("proveedores")
-    .select("*");
-
-    setMateriales(mat || []);
-    setPresupuestos(
-  ordenarPresupuestos(pres || [])
-);
-    setEmpresas(emp || []);
-
-    setLoading(false);
-
-  }
-
-function materialesFiltrados(){
-
-  const busqueda =
-  normalizarTexto(busquedaMaterial.trim());
-
-  if(!busqueda){
-    return [];
-  }
-
-  return materiales.filter(m=>
-    normalizarTexto(m.nombre).includes(busqueda) ||
-    normalizarTexto(m.stock).includes(busqueda)
-  );
+  cargarTodo();
 
 }
 
 
-function normalizarTexto(texto){
-
-  return String(texto || "")
-  .toLowerCase()
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g,"");
-
-}
-
-function presupuestosFiltrados(){
-
-  const busqueda =
-  normalizarTexto(busquedaPresupuesto);
-
-  if(!busqueda){
-    return presupuestos;
-  }
-
-  return presupuestos.filter(p=>
-    normalizarTexto(p.cliente).includes(busqueda) ||
-    normalizarTexto(p.estado).includes(busqueda) ||
-    normalizarTexto(p.fecha).includes(busqueda)
-  );
-
-}
-
-function mesPresupuesto(fecha){
-
-  if(!fecha){
-    return "Sin fecha";
-  }
-
-  const date =
-  new Date(fecha + "T00:00:00");
-
-  return date.toLocaleDateString(
-    "es-AR",
-    {
-      month:"long",
-      year:"numeric"
-    }
-  );
-
-}
-
-function presupuestosAgrupadosPorMes(){
-
-  return presupuestosFiltrados()
-  .reduce((grupos,p)=>{
-
-    const mes =
-    mesPresupuesto(p.fecha);
-
-    if(!grupos[mes]){
-      grupos[mes] = [];
-    }
-
-    grupos[mes].push(p);
-
-    return grupos;
-
-  },{});
-
-}
-
-
-function cantidadItem(item){
-
-  if(item.cantidad){
-    return Number(item.cantidad);
-  }
-
-  const match =
-  String(item.label || "").match(/^(\d+)x\s/i);
-
-  return match ? Number(match[1]) : 1;
-
-}
-
-function materialIdItem(item){
-
-  if(item.material_id){
-    return item.material_id;
-  }
-
-  if(item.id && !String(item.id).startsWith("extra-")){
-    return item.id;
-  }
-
-  return "";
-
-}
-
-function abrirControl(presupuesto,tipo){
-
-  setControlModal({
-    tipo,
-    presupuesto
-  });
-
-}
-
-function cerrarControl(){
-
-  setControlModal(null);
-
-}
-
-function actualizarItemControl(idx,cambios){
-
-  setControlModal(prev=>{
-
-    if(!prev){
-      return prev;
-    }
-
-    const checklist =
-    (prev.presupuesto.checklist || [])
-    .map((item,index)=>
-      index === idx
-      ? {
-          ...item,
-          ...cambios
-        }
-      : item
-    );
-
-    return {
-      ...prev,
-      presupuesto:{
-        ...prev.presupuesto,
-        checklist
+  async function cargarTodo() {
+    try {
+      const [mRes, pRes, cRes, pvRes, fRes] = await Promise.all([
+        db.from("materiales").select("*").order("nombre"),
+        db.from("presupuestos").select("*").order("fecha", { ascending: true }),
+        db.from("colaboradores").select("*").order("nombre"),
+        db.from("proveedores").select("*").order("nombre"),
+        db.from("presupuestos_formales").select("*").order("id", { ascending: false })
+      ]);
+      if (mRes.data) setMateriales(mRes.data);
+      if (pRes.data) {
+        setPresupuestos(pRes.data);
+        setEventosCalendario(pRes.data.map(p => ({
+          id: p.id,
+          title: `${p.cliente || "Evento"} • ${p.estado || "Pendiente"}`,
+          start: p.fecha,
+          allDay: true
+        })));
       }
-    };
+      if (cRes.data) setColaboradores(cRes.data);
+      if (pvRes.data) setProveedores(pvRes.data);
+      if (fRes.data) setPresupuestosFormales(fRes.data);
+    } catch (err) { console.error(err); }
+  }
 
-  });
 
-}
 
 function actualizarPresupuestoLocal(id,cambios){
 
   setPresupuestos(prev=>
-    ordenarPresupuestos(
-      prev.map(p=>
-        p.id === id
-        ? {
-            ...p,
-            ...cambios
-          }
-        : p
-      )
+    prev.map(p=>
+      p.id === id
+      ? {
+          ...p,
+          ...cambios
+        }
+      : p
     )
   );
 
 }
 
-async function guardarChecklistPresupuesto(
-  presupuesto,
-  nuevoChecklist,
-  cambiosExtra={}
-){
+function actualizarMaterialLocal(id,cambios){
+
+  setMateriales(prev=>
+    prev.map(m=>
+      m.id === id
+      ? {
+          ...m,
+          ...cambios
+        }
+      : m
+    )
+  );
+
+}
+
+function actualizarProveedorLocal(id,cambios){
+
+  setProveedores(prev=>
+    prev.map(p=>
+      p.id === id
+      ? {
+          ...p,
+          ...cambios
+        }
+      : p
+    )
+  );
+
+}
+
+function actualizarColaboradorLocal(id,cambios){
+
+  setColaboradores(prev=>
+    prev.map(c=>
+      c.id === id
+      ? {
+          ...c,
+          ...cambios
+        }
+      : c
+    )
+  );
+
+}
+
+function actualizarFormalLocal(id,cambios){
+
+  setPresupuestosFormales(prev=>
+    prev.map(p=>
+      p.id === id
+      ? {
+          ...p,
+          ...cambios
+        }
+      : p
+    )
+  );
+
+}
+
+
+
+  // ── PRESUPUESTOS ──
+  function calcularProgreso(checklist = []) {
+    if (!checklist.length) return 0;
+    return Math.round(checklist.filter(i => i.ready).length * 100 / checklist.length);
+  }
+
+  function abrirChecklist(p) {
+    let lista = p.checklist || [];
+    if (!lista.length) {
+      lista = (p.materiales || []).map(m => ({
+        id: crypto.randomUUID(),
+        label: `${m.cantidad}x ${m.nombre}`,
+        ready: false,
+        comentario: ""
+      }));
+    }
+    setPresupuestoChecklist({ ...p, checklist: lista });
+    setModalChecklist(true);
+  }
+
+  async function guardarChecklist() {
+
+  const completo =
+  presupuestoChecklist.checklist.every(i => i.ready);
+
+  const cambios = {
+    checklist:presupuestoChecklist.checklist,
+    etapa:completo ? "preparado" : "pendiente_preparacion"
+  };
+
+  const { error } = await db
+  .from("presupuestos")
+  .update(cambios)
+  .eq("id",presupuestoChecklist.id);
+
+  if(error){
+    alert("No se pudo guardar el checklist.");
+    console.error(error.message);
+    return;
+  }
 
   actualizarPresupuestoLocal(
-    presupuesto.id,
-    {
-      checklist:nuevoChecklist,
-      ...cambiosExtra
-    }
+    presupuestoChecklist.id,
+    cambios
   );
 
-  const {
-    error
-  } = await db
-  .from("presupuestos")
-  .update({
-    checklist:nuevoChecklist,
-    ...cambiosExtra
-  })
-  .eq("id",presupuesto.id);
-
-  if(error){
-
-    console.error(
-      "Error guardando presupuesto:",
-      error.message
-    );
-
-    actualizarPresupuestoLocal(
-      presupuesto.id,
-      presupuesto
-    );
-
-    return false;
-
-  }
-
-  return true;
+  setModalChecklist(false);
 
 }
 
-async function marcarListoParaCargar(presupuesto){
+  async function cambiarEtapa(p, etapa) {
 
-  const {
-    error
-  } = await db
+  const { error } = await db
   .from("presupuestos")
-  .update({
-    estado:"listo para cargar"
-  })
-  .eq("id",presupuesto.id);
+  .update({ etapa })
+  .eq("id",p.id);
 
-  if(!error){
+  if(error){
+    alert("No se pudo cambiar la etapa.");
+    console.error(error.message);
+    return;
+  }
 
-    actualizarPresupuestoLocal(
-      presupuesto.id,
-      {
-        estado:"listo para cargar"
+  actualizarPresupuestoLocal(
+    p.id,
+    { etapa }
+  );
+
+}
+
+  async function exportarPDF(p) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
+    try {
+      const b64 = await getBase64(LOGO);
+      doc.addImage(b64, "JPEG", 14, 10, 26, 26);
+    } catch {}
+    y = 45;
+    doc.setFontSize(24); doc.text("PRESUPUESTO", 14, y); y += 20;
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${p.cliente}`, 14, y); y += 10;
+    doc.text(`Fecha: ${p.fecha || "-"}`, 14, y); y += 20;
+    doc.setFontSize(14);
+doc.text("Materiales", 14, y);
+y += 10;
+
+doc.setFontSize(11);
+(p.materiales || []).forEach(m => {
+  doc.text(`${m.cantidad || 1}x ${m.nombre || "-"}`, 20, y);
+  y += 8;
+});
+
+const totalColaboradores =
+(p.colaboradores || []).reduce((sum,c)=>
+  sum + Number(c.cantidad || 0),
+  0
+);
+
+if(totalColaboradores > 0){
+  y += 8;
+  doc.setFontSize(14);
+  doc.text("Colaboradores", 14, y);
+  y += 10;
+
+  doc.setFontSize(11);
+  doc.text(`Cantidad total: ${totalColaboradores}`, 20, y);
+  y += 8;
+}
+
+if((p.proveedores || []).length > 0){
+  y += 8;
+  doc.setFontSize(14);
+  doc.text("Empresas", 14, y);
+  y += 10;
+
+  doc.setFontSize(11);
+  (p.proveedores || []).forEach(e => {
+    doc.text(`${e.cantidad || 1}x ${e.nombre || "-"}`, 20, y);
+    y += 8;
+  });
+}
+
+y += 20;
+doc.setFontSize(20);
+doc.text(`TOTAL: $${Number(p.total || 0).toLocaleString()}`, 14, y);
+    doc.save(`Presupuesto_${p.numero || p.id}.pdf`);
+  }
+
+  // ── MATERIALES ──
+  async function guardarMaterial() {
+    try {
+      let imagenUrl = materialEditando.imagen || "";
+      if (materialEditando.archivoImagen) {
+        const archivo = materialEditando.archivoImagen;
+        const ext = archivo.name.split(".").pop();
+        const nombre = `materiales/${Date.now()}_${Math.random().toString(36).substring(2)}.${ext}`;
+        const { error } = await db.storage.from("imagenes").upload(nombre, archivo, { cacheControl: "0", upsert: true });
+        if (error) { alert(error.message); return; }
+        imagenUrl = db.storage.from("imagenes").getPublicUrl(nombre).data.publicUrl;
       }
-    );
-
-  }
-
-}
-
-async function guardarControlCarga(){
-
-  if(!controlModal){
-    return;
-  }
-
-  const presupuesto =
-  controlModal.presupuesto;
-
-  const checklist =
-  presupuesto.checklist || [];
-
-  const todoCargado =
-  checklist.length > 0 &&
-  checklist.every(item=>item.cargado);
-
-  const estado =
-  todoCargado
-  ? "cargado"
-  : presupuesto.estado;
-
-  const ok =
-  await guardarChecklistPresupuesto(
-    presupuesto,
-    checklist,
-    {
-      estado
-    }
-  );
-
-  if(ok){
-    cerrarControl();
-  }
-
-}
-
-async function devolverStockSiCorresponde(checklist){
-
-  const itemsADevolver =
-  checklist.filter(item=>
-    item.regreso_ok &&
-    !item.stock_devuelto
-  );
-
-  for(const item of itemsADevolver){
-
-    const materialId =
-    materialIdItem(item);
-
-    if(!materialId){
-      continue;
-    }
-
-    const material =
-    materiales.find(m=>
-      String(m.id) === String(materialId)
-    );
-
-    if(!material){
-      continue;
-    }
-
-    const cantidad =
-    Number(item.recibido || cantidadItem(item));
-
-    const nuevoStock =
-    Number(material.stock || 0) + cantidad;
-
-    const {
-      error
-    } = await db
-    .from("materiales")
-    .update({
-      stock:nuevoStock
-    })
-    .eq("id",material.id);
-
-    if(!error){
-
-      setMateriales(prev=>
-        prev.map(m=>
-          m.id === material.id
-          ? {
-              ...m,
-              stock:nuevoStock
-            }
-          : m
-        )
-      );
-
-    }
-
-  }
-
-  return checklist.map(item=>
-    item.regreso_ok && !item.stock_devuelto
-    ? {
-        ...item,
-        stock_devuelto:true
+      const payload = {
+        nombre: materialEditando.nombre || "",
+        stock: Number(materialEditando.stock || 0),
+        costo: Number(materialEditando.costo || 0),
+        precio: Number(materialEditando.precio || 0),
+        imagen: imagenUrl
+      };
+      let res;
+      if (materialEditando.id) {
+        res = await db.from("materiales").update(payload).eq("id", materialEditando.id);
+      } else {
+        res = await db.from("materiales").insert(payload);
       }
-    : item
-  );
+      if (res.error) { alert(res.error.message); return; }
+      setModalMaterial(false);
+      cargarTodo();
+    } catch (err) { alert("Error guardando material"); }
+  }
 
-}
+  async function eliminarMaterial(id) {
 
-async function guardarControlRegreso(){
-
-  if(!controlModal){
+  if(!confirm("¿Eliminar material?")){
     return;
   }
 
-  const presupuesto =
-  controlModal.presupuesto;
-
-  let checklist =
-  presupuesto.checklist || [];
-
-  const todoCorrecto =
-  checklist.length > 0 &&
-  checklist.every(item=>item.regreso_ok);
-
-  if(todoCorrecto){
-
-    checklist =
-    await devolverStockSiCorresponde(checklist);
-
-  }
-
-  const estado =
-  todoCorrecto
-  ? "devuelto_correcto"
-  : "regreso_con_observaciones";
-
-  const ok =
-  await guardarChecklistPresupuesto(
-    presupuesto,
-    checklist,
-    {
-      estado
-    }
-  );
-
-  if(ok){
-    cerrarControl();
-  }
-
-}
-
-
-
-function fechaKey(fecha){
-
-  if(!fecha){
-    return "";
-  }
-
-  return String(fecha).slice(0,10);
-
-}
-
-function cambiarMes(offset){
-
-  setCalendarMonth(prev=>
-    new Date(
-      prev.getFullYear(),
-      prev.getMonth() + offset,
-      1
-    )
-  );
-
-}
-
-function abrirPresupuestoDesdeCalendario(id){
-
-  setFocusedPresupuestoId(id);
-  setSection("presupuestos");
-
-}
-
-
-async function eliminarItemChecklist(
-  presupuesto,
-  idx
-){
-
-  const nuevoChecklist =
-  (presupuesto.checklist || [])
-  .filter((_,index)=>
-    index !== idx
-  );
-
-  setPresupuestos(prev=>
-    ordenarPresupuestos(
-      prev.map(p=>
-        p.id === presupuesto.id
-        ? {
-            ...p,
-            checklist:nuevoChecklist
-          }
-        : p
-      )
-    )
-  );
-
-  const {
-    error
-  } = await db
-  .from("presupuestos")
-  .update({
-    checklist:nuevoChecklist
-  })
-  .eq("id",presupuesto.id);
+  const { error } = await db
+  .from("materiales")
+  .delete()
+  .eq("id",id);
 
   if(error){
-
-    console.error(
-      "Error eliminando item:",
-      error.message
-    );
-
-    setPresupuestos(prev=>
-      ordenarPresupuestos(
-        prev.map(p=>
-          p.id === presupuesto.id
-          ? presupuesto
-          : p
-        )
-      )
-    );
-
-  }
-
-}
-
-async function agregarMaterialAlChecklist(presupuesto){
-
-  const materialId =
-  materialExtra[presupuesto.id];
-
-  const cantidad =
-  Number(cantidadExtra[presupuesto.id] || 1);
-
-  if(!materialId){
+    alert("No se pudo eliminar.");
+    console.error(error.message);
     return;
   }
 
-  const material =
-  materiales.find(m=>
-    String(m.id) === String(materialId)
-  );
-
-  if(!material){
-    return;
-  }
-
-  const nuevoItem = {
-    id:`extra-${material.id}-${Date.now()}`,
-    material_id:material.id,
-    label:`${cantidad}x ${material.nombre}`,
-    ready:false,
-    comentario:""
-  };
-
-  const nuevoChecklist = [
-    ...(presupuesto.checklist || []),
-    nuevoItem
-  ];
-
-  setPresupuestos(prev=>
-    ordenarPresupuestos(
-      prev.map(p=>
-        p.id === presupuesto.id
-        ? {
-            ...p,
-            checklist:nuevoChecklist
-          }
-        : p
-      )
+  setMateriales(prev=>
+    prev.filter(m=>
+      m.id !== id
     )
   );
 
-  const {
-    error
-  } = await db
-  .from("presupuestos")
-  .update({
-    checklist:nuevoChecklist
-  })
-  .eq("id",presupuesto.id);
-
-  if(error){
-
-    console.error(
-      "Error agregando material al checklist:",
-      error.message
-    );
-
-    setPresupuestos(prev=>
-      ordenarPresupuestos(
-        prev.map(p=>
-          p.id === presupuesto.id
-          ? presupuesto
-          : p
-        )
-      )
-    );
-
-    return;
-
-  }
-
-  setMaterialExtra(prev=>({
-    ...prev,
-    [presupuesto.id]:""
-  }));
-
-  setCantidadExtra(prev=>({
-    ...prev,
-    [presupuesto.id]:1
-  }));
-
 }
 
-
-function obtenerNombreMaterial(item){
-
-  if(typeof item === "string"){
-    return item;
-  }
-
-  if(item.nombre){
-    return item.nombre;
-  }
-
-  const materialId =
-  item.material_id ||
-  item.materialId ||
-  item.id_material ||
-  item.id;
-
-  const material =
-  materiales.find(m=>
-    Number(m.id) === Number(materialId)
-  );
-
-  return material?.nombre || "Material sin nombre";
-
-}
-
-
-
-function ordenarPresupuestos(lista=[]){
-
-  return [...lista].sort((a,b)=>{
-
-    const fechaA = new Date(a.fecha || "9999-12-31");
-    const fechaB = new Date(b.fecha || "9999-12-31");
-
-    if(fechaA.getTime() !== fechaB.getTime()){
-      return fechaA - fechaB;
-    }
-
-    return Number(a.id || 0) - Number(b.id || 0);
-
-  });
-
-}
-
-
-function abrirEditarMaterial(material){
-
-  setMaterialEditando(material);
-
-  setMaterialForm({
-    nombre:material.nombre || "",
-    stock:material.stock || "",
-    imagen:material.imagen || ""
-  });
-
-  setImagenMaterialFile(null);
-  setImagenMaterialPreview(material.imagen || "");
-
-}
-
-
-
-function cerrarModalMaterial(){
-
-  setMaterialEditando(null);
-
-  setMaterialForm({
-    nombre:"",
-    stock:"",
-    imagen:""
-  });
-
-  setImagenMaterialFile(null);
-  setImagenMaterialPreview("");
-
-}
-
-
-function seleccionarImagenMaterial(e){
-
-  const file = e.target.files[0];
-
-  if(!file){
-    return;
-  }
-
-  setImagenMaterialFile(file);
-  setImagenMaterialPreview(URL.createObjectURL(file));
-
-}
-
-
-
-async function guardarMaterial(){
-
-  if(!materialEditando){
-    return;
-  }
-
-  setGuardandoMaterial(true);
-
-  let imagenUrl =
-  materialForm.imagen;
-
-  if(imagenMaterialFile){
-
-    const extension =
-    imagenMaterialFile.name.split(".").pop();
-
-    const nombreBase =
-    materialEditando.id || `nuevo-${Date.now()}`;
-
-    const nombreArchivo =
-    `materiales/${nombreBase}-${Date.now()}.${extension}`;
-
-    const {
-      error:uploadError
-    } = await db.storage
-    .from("imagenes")
-    .upload(nombreArchivo,imagenMaterialFile,{
-      cacheControl:"3600",
-      upsert:true
+  async function exportarMaterialesPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
+    try {
+      const b64 = await getBase64(LOGO);
+      doc.addImage(b64, "JPEG", 14, 10, 24, 24);
+    } catch {}
+    y = 45;
+    doc.setFontSize(22); doc.text("CONTROL GENERAL DE INVENTARIO", 14, y); y += 20;
+    doc.setFontSize(10);
+    doc.text("Nombre", 14, y); doc.text("Stock", 80, y); doc.text("Costo", 120, y); doc.text("Venta", 160, y);
+    y += 10;
+    materiales.forEach(m => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.text(String(m.nombre || ""), 14, y);
+      doc.text(String(m.stock || 0), 80, y);
+      doc.text(`$${Number(m.costo || 0).toLocaleString()}`, 120, y);
+      doc.text(`$${Number(m.precio || 0).toLocaleString()}`, 160, y);
+      y += 10;
     });
+    doc.save("Inventario_General.pdf");
+  }
 
-    if(uploadError){
-
-      console.error(
-        "Error subiendo imagen:",
-        uploadError.message
-      );
-
-      setGuardandoMaterial(false);
-      return;
-
+  // ── COLABORADORES ──
+  async function guardarColaborador() {
+    const payload = {
+      nombre: colaboradorEditando.nombre || "",
+      telefono: colaboradorEditando.telefono || "",
+      rol: colaboradorEditando.rol || ""
+    };
+    if (colaboradorEditando.id) {
+      await db.from("colaboradores").update(payload).eq("id", colaboradorEditando.id);
+    } else {
+      await db.from("colaboradores").insert(payload);
     }
-
-    const {
-      data:publicData
-    } = db.storage
-    .from("imagenes")
-    .getPublicUrl(nombreArchivo);
-
-    imagenUrl =
-    publicData.publicUrl;
-
+    setModalColaborador(false);
+    cargarTodo();
   }
 
-  const materialGuardado = {
-    nombre:materialForm.nombre,
-    stock:Number(materialForm.stock || 0),
-    imagen:imagenUrl
-  };
+  async function eliminarColaborador(id) {
 
-  let respuesta;
-
-  if(materialEditando.id){
-
-    respuesta =
-    await db
-    .from("materiales")
-    .update(materialGuardado)
-    .eq("id",materialEditando.id)
-    .select()
-    .single();
-
-  }else{
-
-    respuesta =
-    await db
-    .from("materiales")
-    .insert(materialGuardado)
-    .select()
-    .single();
-
-  }
-
-  setGuardandoMaterial(false);
-
-  if(respuesta.error){
-
-    console.error(
-      "Error guardando material:",
-      respuesta.error.message
-    );
-
+  if(!confirm("¿Eliminar colaborador?")){
     return;
-
   }
 
-  if(materialEditando.id){
+  const { error } = await db
+  .from("colaboradores")
+  .delete()
+  .eq("id",id);
 
-    setMateriales(prev=>
-      prev.map(m=>
-        m.id === materialEditando.id
-        ? respuesta.data
-        : m
+  if(error){
+    alert("No se pudo eliminar.");
+    console.error(error.message);
+    return;
+  }
+
+  setColaboradores(prev=>
+    prev.filter(c=>
+      c.id !== id
+    )
+  );
+
+}
+
+  // ── PROVEEDORES ──
+  async function guardarProveedor() {
+    const payload = {
+      nombre: proveedorEditando.nombre || "",
+      telefono: proveedorEditando.telefono || "",
+      servicio: proveedorEditando.servicio || "",
+      precio: Number(proveedorEditando.precio || 0)
+    };
+    if (proveedorEditando.id) {
+      await db.from("proveedores").update(payload).eq("id", proveedorEditando.id);
+    } else {
+      await db.from("proveedores").insert(payload);
+    }
+    setModalProveedor(false);
+    cargarTodo();
+  }
+
+  async function eliminarProveedor(id) {
+
+  if(!confirm("¿Eliminar empresa?")){
+    return;
+  }
+
+  const { error } = await db
+  .from("proveedores")
+  .delete()
+  .eq("id",id);
+
+  if(error){
+    alert("No se pudo eliminar.");
+    console.error(error.message);
+    return;
+  }
+
+  setProveedores(prev=>
+    prev.filter(p=>
+      p.id !== id
+    )
+  );
+
+}
+
+  // ── PRESUPUESTOS FORMALES ──
+  function nuevoFormal() {
+
+  setFormalEditando({
+    cliente:"",
+    fecha:"",
+    items:[],
+    colaboradores:[],
+    proveedores:[],
+    total:0,
+    notas:""
+  });
+
+  setModalFormal(true);
+
+}
+
+  function agregarItemFormal(){
+
+  setFormalEditando(prev=>{
+
+    const items = [
+      ...(prev.items || []),
+      {
+        descripcion:"",
+        cantidad:1,
+        precio:0
+      }
+    ];
+
+    return {
+      ...prev,
+      items,
+      total:recalcularTotalFormal(
+        items,
+        prev.colaboradores || [],
+        prev.proveedores || []
       )
-    );
+    };
 
-  }else{
-
-    setMateriales(prev=>[
-      respuesta.data,
-      ...prev
-    ]);
-
-  }
-
-  cerrarModalMaterial();
+  });
 
 }
 
 
-
-  function calcularProgreso(
-    checklist=[]
-  ){
-
-    if(!checklist.length)
-    return 0;
-
-    const completos =
-checklist.filter(
-  i=>i.ready
-).length;
-
-    return Math.round(
-      (completos/checklist.length)*100
-    );
-
+  function actualizarItemFormal(idx, campo, valor) {
+    setFormalEditando(prev => {
+      const items = [...prev.items];
+      items[idx] = { ...items[idx], [campo]: valor };
+      const total = items.reduce((acc, it) => acc + Number(it.precio || 0) * Number(it.cantidad || 1), 0);
+      return { ...prev, items, total };
+    });
   }
 
-  async function toggleChecklist(
-  presupuesto,
-  idx
-){
+  function eliminarItemFormal(idx) {
+    setFormalEditando(prev => {
+      const items = prev.items.filter((_, i) => i !== idx);
+      const total = items.reduce((acc, it) => acc + Number(it.precio || 0) * Number(it.cantidad || 1), 0);
+      return { ...prev, items, total };
+    });
+  }
 
-  const checklistActual =
-  presupuesto.checklist || [];
+  function importarDesdeInterno(p) {
 
-  const nuevos =
-  checklistActual.map((item,index)=>{
+  const items =
+  (p.materiales || []).map(m=>({
+    descripcion:m.nombre || "",
+    cantidad:Number(m.cantidad || 1),
+    precio:Number(m.precio || 0)
+  }));
 
-    if(index !== idx){
-      return item;
+  const colaboradoresImportados =
+  (p.colaboradores || []).map(c=>({
+    id:c.id || "",
+    nombre:c.nombre || "",
+    cantidad:Number(c.cantidad || 1),
+    precio:Number(c.precio || 0),
+    rol:c.rol || "",
+    telefono:c.telefono || ""
+  }));
+
+  const proveedoresImportados =
+  (p.proveedores || []).map(e=>({
+    id:e.id || "",
+    nombre:e.nombre || "",
+    cantidad:Number(e.cantidad || 1),
+    precio:Number(e.precio || 0),
+    servicio:e.servicio || "",
+    telefono:e.telefono || ""
+  }));
+
+  const total =
+  recalcularTotalFormal(
+    items,
+    colaboradoresImportados,
+    proveedoresImportados
+  );
+
+  setFormalEditando({
+    cliente:p.cliente || "",
+    fecha:p.fecha || "",
+    items,
+    colaboradores:colaboradoresImportados,
+    proveedores:proveedoresImportados,
+    total,
+    notas:p.notas || ""
+  });
+
+  setModalImportar(false);
+  setModalFormal(true);
+
+}
+
+function recalcularTotalFormal(items, colaboradoresLista, proveedoresLista){
+
+  const totalItems =
+  (items || []).reduce((sum,item)=>
+    sum + Number(item.cantidad || 0) * Number(item.precio || 0),
+    0
+  );
+
+  const totalColaboradores =
+  (colaboradoresLista || []).reduce((sum,item)=>
+    sum + Number(item.cantidad || 0) * Number(item.precio || 0),
+    0
+  );
+
+  const totalProveedores =
+  (proveedoresLista || []).reduce((sum,item)=>
+    sum + Number(item.cantidad || 0) * Number(item.precio || 0),
+    0
+  );
+
+  return totalItems + totalColaboradores + totalProveedores;
+
+}
+
+function agregarColaboradorFormal(){
+
+  setFormalEditando(prev=>{
+
+    const colaboradoresLista = [
+      ...(prev.colaboradores || []),
+      {
+        id:"",
+        nombre:"",
+        cantidad:1,
+        precio:0,
+        rol:"",
+        telefono:""
+      }
+    ];
+
+    return {
+      ...prev,
+      colaboradores:colaboradoresLista,
+      total:recalcularTotalFormal(
+        prev.items || [],
+        colaboradoresLista,
+        prev.proveedores || []
+      )
+    };
+
+  });
+
+}
+
+
+function actualizarColaboradorFormal(idx,campo,valor){
+
+  setFormalEditando(prev=>{
+
+    const lista =
+    [...(prev.colaboradores || [])];
+
+    lista[idx] = {
+      ...lista[idx],
+      [campo]:valor
+    };
+
+    if(campo === "id"){
+
+      const colaborador =
+      colaboradores.find(c=>
+        String(c.id) === String(valor)
+      );
+
+      if(colaborador){
+
+        lista[idx] = {
+          ...lista[idx],
+          id:colaborador.id,
+          nombre:colaborador.nombre,
+          rol:colaborador.rol || "",
+          telefono:colaborador.telefono || "",
+          precio:Number(colaborador.precio || colaborador.costo || lista[idx].precio || 0)
+        };
+
+      }
+
     }
 
     return {
-  ...item,
-  ready:!item.ready
-};
+      ...prev,
+      colaboradores:lista,
+      total:recalcularTotalFormal(
+        prev.items || [],
+        lista,
+        prev.proveedores || []
+      )
+    };
 
   });
-
-  setPresupuestos(prev=>
-    ordenarPresupuestos(
-      prev.map(p=>
-        p.id === presupuesto.id
-        ? {
-            ...p,
-            checklist:nuevos
-          }
-        : p
-      )
-    )
-  );
-
-  const {
-    error
-  } = await db
-  .from("presupuestos")
-  .update({
-    checklist:nuevos
-  })
-  .eq("id",presupuesto.id);
-
-  if(error){
-
-    console.error(
-      "Error guardando checklist:",
-      error.message
-    );
-
-    setPresupuestos(prev=>
-      ordenarPresupuestos(
-        prev.map(p=>
-          p.id === presupuesto.id
-          ? presupuesto
-          : p
-        )
-      )
-    );
-
-  }
 
 }
 
 
-  async function cambiarEstado(
-    presupuesto,
-    estado
-  ){
 
-    await db
-    .from("presupuestos")
-    .update({
-      estado
-    })
-    .eq("id",presupuesto.id);
+function eliminarColaboradorFormal(idx){
 
-    cargarTodo();
+  setFormalEditando(prev=>{
 
-  }
-
-  if(loading){
-
-    return(
-      <div className="loader">
-        Cargando...
-      </div>
+    const lista =
+    (prev.colaboradores || [])
+    .filter((_,index)=>
+      index !== idx
     );
 
+    return {
+      ...prev,
+      colaboradores:lista,
+      total:recalcularTotalFormal(
+        prev.items || [],
+        lista,
+        prev.proveedores || []
+      )
+    };
+
+  });
+
+}
+
+
+
+function agregarProveedorFormal(){
+
+  setFormalEditando(prev=>{
+
+    const proveedoresLista = [
+      ...(prev.proveedores || []),
+      {
+        id:"",
+        nombre:"",
+        cantidad:1,
+        precio:0,
+        servicio:"",
+        telefono:""
+      }
+    ];
+
+    return {
+      ...prev,
+      proveedores:proveedoresLista,
+      total:recalcularTotalFormal(
+        prev.items || [],
+        prev.colaboradores || [],
+        proveedoresLista
+      )
+    };
+
+  });
+
+}
+
+
+
+function actualizarProveedorFormal(idx,campo,valor){
+
+  setFormalEditando(prev=>{
+
+    const lista =
+    [...(prev.proveedores || [])];
+
+    lista[idx] = {
+      ...lista[idx],
+      [campo]:valor
+    };
+
+    if(campo === "id"){
+
+      const proveedor =
+      proveedores.find(p=>
+        String(p.id) === String(valor)
+      );
+
+      if(proveedor){
+
+        lista[idx] = {
+          ...lista[idx],
+          id:proveedor.id,
+          nombre:proveedor.nombre,
+          servicio:proveedor.servicio || "",
+          telefono:proveedor.telefono || "",
+          precio:Number(proveedor.precio || proveedor.costo || lista[idx].precio || 0)
+        };
+
+      }
+
+    }
+
+    return {
+      ...prev,
+      proveedores:lista,
+      total:recalcularTotalFormal(
+        prev.items || [],
+        prev.colaboradores || [],
+        lista
+      )
+    };
+
+  });
+
+}
+
+function eliminarProveedorFormal(idx){
+
+  setFormalEditando(prev=>{
+
+    const lista =
+    (prev.proveedores || [])
+    .filter((_,index)=>
+      index !== idx
+    );
+
+    return {
+      ...prev,
+      proveedores:lista,
+      total:recalcularTotalFormal(
+        prev.items || [],
+        prev.colaboradores || [],
+        lista
+      )
+    };
+
+  });
+
+}
+
+  async function guardarFormal() {
+    try {
+      const payload = {
+  cliente:formalEditando.cliente || "",
+  fecha:formalEditando.fecha || null,
+  items:formalEditando.items || [],
+  colaboradores:formalEditando.colaboradores || [],
+  proveedores:formalEditando.proveedores || [],
+  total:Number(formalEditando.total || 0),
+  notas:formalEditando.notas || ""
+};
+      let res;
+      if (formalEditando.id) {
+        res = await db.from("presupuestos_formales").update(payload).eq("id", formalEditando.id);
+      } else {
+        res = await db.from("presupuestos_formales").insert(payload);
+      }
+      if (res.error) { alert(res.error.message); return; }
+      setModalFormal(false);
+      cargarTodo();
+    } catch (err) { alert("Error guardando presupuesto"); }
   }
 
-  return(
+  async function eliminarFormal(id) {
 
+  if(!confirm("¿Eliminar presupuesto formal?")){
+    return;
+  }
+
+  const { error } = await db
+  .from("presupuestos_formales")
+  .delete()
+  .eq("id",id);
+
+  if(error){
+    alert("No se pudo eliminar.");
+    console.error(error.message);
+    return;
+  }
+
+  setPresupuestosFormales(prev=>
+    prev.filter(p=>
+      p.id !== id
+    )
+  );
+
+}
+
+  async function exportarFormalPDF(p) {
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p","mm","a4");
+
+  const pageW = 210;
+  const pageH = 297;
+
+  const gold = [218,185,92];
+  const dark = [36,35,35];
+  const white = [250,250,250];
+
+  function fondo(){
+    doc.setFillColor(...dark);
+    doc.rect(0,0,pageW,pageH,"F");
+
+    doc.setFillColor(20,20,20);
+    doc.rect(0,0,pageW,pageH,"F");
+
+    doc.setFillColor(78,55,38);
+    doc.circle(35,250,70,"F");
+
+    doc.setFillColor(48,48,48);
+    doc.circle(180,40,70,"F");
+
+    doc.setFillColor(0,0,0);
+    doc.setGState(new doc.GState({ opacity:0.35 }));
+    doc.rect(0,0,pageW,pageH,"F");
+    doc.setGState(new doc.GState({ opacity:1 }));
+  }
+
+const rageFontUrl =
+"https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/RAGE.TTF";
+
+try{
+  await cargarFuenteTTF(
+    doc,
+    rageFontUrl,
+    "Rage"
+  );
+}catch(error){
+  console.warn(
+    "No se pudo cargar la fuente RAGE.TTF",
+    error
+  );
+}
+
+  function textoCortado(texto,x,y,maxWidth,lineHeight=7){
+    const lines = doc.splitTextToSize(String(texto || ""),maxWidth);
+    lines.forEach(line=>{
+      doc.text(line,x,y);
+      y += lineHeight;
+    });
+    return y;
+  }
+
+  function asegurarEspacio(y,alto=20){
+    if(y + alto < 245){
+      return y;
+    }
+
+    doc.addPage();
+    fondo();
+    return 24;
+  }
+
+  function bullet(texto,y){
+    y = asegurarEspacio(y,14);
+
+    doc.setFillColor(...gold);
+    doc.circle(17,y - 2,1.8,"F");
+
+    doc.setTextColor(...white);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(12);
+
+    return textoCortado(texto,25,y,158,7) + 4;
+  }
+
+  fondo();
+
+  try {
+  const logo2 =
+  "https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/logo2.png";
+
+  const logo = await getBase64(logo2);
+
+  doc.addImage(
+    logo,
+    "PNG",
+    150,
+    15,
+    48,
+    43
+  );
+} catch {}
+
+  doc.setTextColor(...gold);
+  try{
+  doc.setFont("Rage","normal");
+}catch{
+  doc.setFont("times","italic");
+}
+doc.setFontSize(50);
+doc.text("Menú",18,38);
+
+  doc.setTextColor(...white);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(34);
+  doc.text("PRESUPUESTO",28,52);
+
+  doc.setFontSize(16);
+  doc.text(p.cliente || "Evento",105,70,{ align:"center" });
+
+  if(p.fecha){
+    doc.setFontSize(11);
+    doc.setTextColor(220,220,220);
+    doc.text(`Fecha: ${p.fecha}`,105,80,{ align:"center" });
+  }
+
+  let y = 100;
+
+  doc.setTextColor(...gold);
+  try{
+  doc.setFont("Rage","normal");
+}catch{
+  doc.setFont("times","italic");
+}
+  doc.setFontSize(30);
+  doc.text("Materiales incluidos",17,y);
+  y += 12;
+
+  (p.items || []).forEach(item=>{
+    y = bullet(
+      `${item.cantidad || 1}x ${item.descripcion || "-"}`,
+      y
+    );
+  });
+
+  const cantidadColaboradores =
+  (p.colaboradores || []).reduce((total,c)=>
+    total + Number(c.cantidad || 0),
+    0
+  );
+
+  if(cantidadColaboradores > 0){
+
+    y += 6;
+    y = asegurarEspacio(y,25);
+
+    doc.setTextColor(...gold);
+  try{
+  doc.setFont("Rage","normal");
+}catch{
+  doc.setFont("times","italic");
+}
+    doc.setFontSize(30);
+    doc.text("Personal incluido",17,y);
+    y += 10;
+
+    doc.setTextColor(...white);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(13);
+    doc.text(`${cantidadColaboradores} colaboradores para el evento.`,17,y);
+    y += 14;
+
+  }
+
+  if((p.proveedores || []).length > 0){
+
+    y += 4;
+    y = asegurarEspacio(y,28);
+
+    doc.setTextColor(...gold);
+  try{
+  doc.setFont("Rage","normal");
+}catch{
+  doc.setFont("times","italic");
+}
+    doc.setFontSize(30);
+    doc.text("Empresas incluidas",17,y);
+    y += 12;
+
+    (p.proveedores || []).forEach(emp=>{
+      y = bullet(
+        `${emp.cantidad || 1}x ${emp.nombre || "-"}`,
+        y
+      );
+    });
+
+  }
+
+  if(p.notas){
+
+    y += 4;
+    y = asegurarEspacio(y,30);
+
+    doc.setTextColor(...gold);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(14);
+    doc.text("Observaciones",17,y);
+    y += 9;
+
+    doc.setTextColor(...white);
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(11);
+    y = textoCortado(p.notas,17,y,176,6);
+
+  }
+
+  const precioY = 222;
+
+  doc.setFillColor(...gold);
+  doc.roundedRect(47,precioY,116,24,5,5,"F");
+
+  doc.setDrawColor(115,78,35);
+  doc.setLineWidth(1);
+  doc.roundedRect(50,precioY + 2,110,20,4,4,"S");
+
+  doc.setTextColor(45,45,45);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(10);
+  doc.text("PRECIO",105,precioY + 8,{ align:"center" });
+
+  doc.setFontSize(23);
+  doc.text(
+    `$ ${Number(p.total || 0).toLocaleString()}`,
+    105,
+    precioY + 19,
+    { align:"center" }
+  );
+
+  doc.setTextColor(...white);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(14);
+  doc.text("Todo listo para que disfrutes de tu evento",105,260,{ align:"center" });
+  doc.text("sin preocuparte por nada.",105,268,{ align:"center" });
+
+  doc.setTextColor(...gold);
+  doc.setFontSize(11);
+  doc.text("Cree Adoras",105,283,{ align:"center" });
+
+  doc.save(`Presupuesto_Formal_${p.cliente || p.id}.pdf`);
+
+}
+
+  // ── UTIL ──
+  async function getBase64(url) {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new Promise(resolve => {
+      const r = new FileReader();
+      r.readAsDataURL(blob);
+      r.onloadend = () => resolve(r.result);
+    });
+  }
+
+  const presupuestosFiltrados = useMemo(() => {
+    const t = busqueda.toLowerCase();
+    return presupuestos.filter(p =>
+      (p.cliente || "").toLowerCase().includes(t) ||
+      String(p.numero || "").includes(t)
+    );
+  }, [presupuestos, busqueda]);
+
+const materialesFiltrados = useMemo(() => {
+
+  const t =
+  busquedaMaterial.trim().toLowerCase();
+
+  if(!t){
+    return [];
+  }
+
+  return materiales.filter(m =>
+    (m.nombre || "").toLowerCase().includes(t) ||
+    String(m.stock || "").includes(t) ||
+    String(m.costo || "").includes(t) ||
+    String(m.precio || "").includes(t)
+  );
+
+}, [materiales,busquedaMaterial]);
+
+  const presupuestosFormalesFiltrados = useMemo(() => {
+    const t = busquedaFormal.toLowerCase();
+    return presupuestosFormales.filter(p =>
+      (p.cliente || "").toLowerCase().includes(t)
+    );
+  }, [presupuestosFormales, busquedaFormal]);
+
+  const totalFacturacion = presupuestos.reduce((acc, p) => acc + Number(p.total || 0), 0);
+
+  // ── RENDER ──
+  function navBtn(id, label) {
+    return (
+      <button
+        className={`nav-btn ${section === id ? "active" : ""}`}
+        onClick={() => { setSection(id); setMenuOpen(false); }}
+      >
+        {label}
+      </button>
+    );
+  }
+
+  return (
     <div className="app">
 
-      <aside className="sidebar">
-
-        <div className="brand">
-
-          <img src={LOGO} />
-
-          <div>
-            Cree Adoras
+      {/* SIDEBAR */}
+      <div className={`sidebar ${menuOpen ? "open" : ""}`}>
+        <div className="sidebar-top">
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <img src={LOGO} style={{ width: 58, height: 58, borderRadius: 18, objectFit: "cover", background: "#fff", padding: 3 }} />
+            <div>
+              <div className="logo-title">Cree Adoras</div>
+              <div className="logo-subtitle">Eventos & Producción</div>
+            </div>
           </div>
-
+          <button className="mobileClose" onClick={() => setMenuOpen(false)}>✕</button>
         </div>
-
-        <button
-          className={
-            section==="dashboard"
-            ? "active"
-            : ""
-          }
-          onClick={()=>
-            setSection("dashboard")
-          }
-        >
-          Dashboard
-        </button>
-
-        <button
-          className={
-            section==="calendario"
-            ? "active"
-            : ""
-          }
-          onClick={()=>
-            setSection("calendario")
-          }
-        >
-          Calendario
-        </button>
-
-        <button
-          className={
-            section==="presupuestos"
-            ? "active"
-            : ""
-          }
-          onClick={()=>
-            setSection("presupuestos")
-          }
-        >
-          Preparación
-        </button>
-
-        <button
-          className={
-            section==="materiales"
-            ? "active"
-            : ""
-          }
-          onClick={()=>
-            setSection("materiales")
-          }
-        >
-          Materiales
-        </button>
-
-        <button
-          className={
-            section==="empresas"
-            ? "active"
-            : ""
-          }
-          onClick={()=>
-            setSection("empresas")
-          }
-        >
-          Empresas
-        </button>
-
-        <button
-          className={
-            section==="eventos"
-            ? "active"
-            : ""
-          }
-          onClick={()=>
-            setSection("eventos")
-          }
-        >
-          Eventos
-        </button>
-
-      </aside>
-
- <main className="content">
-
-        {section==="dashboard" && (
-
-          <>
-
-            <div className="page-title">
-              Dashboard
-            </div>
-
-            <div className="stats-grid">
-
-              <div className="stat-card">
-
-                <div>
-                  Eventos
-                </div>
-
-                <strong>
-		{presupuestos.length}
-                </strong>
-
-              </div>
-
-              <div className="stat-card">
-
-                <div>
-                  Preparados
-                </div>
-
-                <strong>
-
-                  {
-                    presupuestos.filter(
-                      p=>p.estado==="preparado"
-                    ).length
-                  }
-
-                </strong>
-
-              </div>
-
-              <div className="stat-card">
-
-                <div>
-                  Materiales
-                </div>
-
-                <strong>
-                  {materiales.length}
-                </strong>
-
-              </div>
-
-            </div>
-
-          </>
-
-        )}
-
-        {section==="calendario" && (
-
-  <>
-
-    <div className="page-title">
-      Calendario
-    </div>
-
-    <div className="calendar-panel">
-
-      <div className="calendar-header">
-
-        <button
-          className="btn"
-          onClick={()=>
-            cambiarMes(-1)
-          }
-        >
-          Anterior
-        </button>
-
-        <div className="calendar-title">
-          {
-            calendarMonth.toLocaleDateString(
-              "es-AR",
-              {
-                month:"long",
-                year:"numeric"
-              }
-            )
-          }
+        <div className="nav">
+          {navBtn("dashboard", "📅 Calendario")}
+          {navBtn("presupuestos", "📋 Presupuestos Internos")}
+          {navBtn("presupuestosFormales", "📄 Presupuestos Formales")}
+          {navBtn("materiales", "🧰 Materiales")}
+          {navBtn("colaboradores", "👥 Colaboradores")}
+          {navBtn("proveedores", "🏢 Empresas")}
         </div>
-
-        <button
-          className="btn"
-          onClick={()=>
-            cambiarMes(1)
-          }
-        >
-          Siguiente
-        </button>
-
       </div>
 
-      <div className="calendar-month">
+      {/* CONTENT */}
+      <div className="content">
 
-        {["Lun","Mar","Mie","Jue","Vie","Sab","Dom"].map(dia=>(
+        {/* MOBILE HEADER */}
+        <div className="mobileHeader">
+          <button className="mobileMenuBtn" style={{ background: "#c89b6d", color: "white" }} onClick={() => setMenuOpen(true)}>☰</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img src={LOGO} style={{ width: 42, height: 42, borderRadius: 12, objectFit: "cover" }} />
+            <span style={{ fontWeight: 800, fontSize: 18 }}>Cree Adoras</span>
+          </div>
+          <div />
+        </div>
 
-          <div
-            className="calendar-weekday"
-            key={dia}
-          >
+        {/* ── DASHBOARD ── */}
+        {section === "dashboard" && (
+          <>
+            <div className="topbar">
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <img src={LOGO} style={{ width: 56, height: 56, borderRadius: 18, objectFit: "cover", background: "white", padding: 3 }} />
+                <div>
+                  <div className="title">Dashboard</div>
+                  <div className="subtitle">Estadísticas generales</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stats">
+              <div className="stat">
+                <div className="stat-label">PRESUPUESTOS</div>
+                <div className="stat-value">{presupuestos.length}</div>
+              </div>
+              <div className="stat">
+                <div className="stat-label">FACTURACIÓN</div>
+                <div className="stat-value">${totalFacturacion.toLocaleString()}</div>
+              </div>
+              <div className="stat">
+                <div className="stat-label">MATERIALES</div>
+                <div className="stat-value">{materiales.length}</div>
+              </div>
+              <div className="stat">
+                <div className="stat-label">COLABORADORES</div>
+                <div className="stat-value">{colaboradores.length}</div>
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                <div>
+                  <div className="title">Calendario de Eventos</div>
+                  <div className="subtitle">Hacé clic en un evento o fecha</div>
+                </div>
+                <img src={LOGO} style={{ width: 60, height: 60, borderRadius: 18, objectFit: "cover" }} />
+              </div>
+              <div className="calendar-panel">
+
+  <div className="calendar-header">
+
+    <button className="btn btn-white" onClick={()=>cambiarMes(-1)}>
+      Anterior
+    </button>
+
+    <div className="calendar-title">
+      {
+        calendarMonth.toLocaleDateString("es-AR",{
+          month:"long",
+          year:"numeric"
+        })
+      }
+    </div>
+
+    <button className="btn btn-white" onClick={()=>cambiarMes(1)}>
+      Siguiente
+    </button>
+
+  </div>
+
+  <div className="calendar-month">
+
+    {["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"].map(dia=>(
+      <div className="calendar-weekday" key={dia}>
+        {dia}
+      </div>
+    ))}
+
+    {Array.from({
+      length:(
+        new Date(
+          calendarMonth.getFullYear(),
+          calendarMonth.getMonth(),
+          1
+        ).getDay() + 6
+      ) % 7
+    }).map((_,idx)=>(
+      <div className="calendar-day empty" key={`empty-${idx}`} />
+    ))}
+
+    {Array.from({
+      length:new Date(
+        calendarMonth.getFullYear(),
+        calendarMonth.getMonth() + 1,
+        0
+      ).getDate()
+    }).map((_,idx)=>{
+
+      const dia = idx + 1;
+
+      const key =
+      `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
+
+      const eventosDia =
+      presupuestos.filter(p=>fechaKey(p.fecha) === key);
+
+      return(
+        <div className="calendar-day" key={key}>
+
+          <div className="calendar-number">
             {dia}
           </div>
 
-        ))}
-
-        {Array.from({
-          length:(
-            new Date(
-              calendarMonth.getFullYear(),
-              calendarMonth.getMonth(),
-              1
-            ).getDay() + 6
-          ) % 7
-        }).map((_,idx)=>(
-
-          <div
-            className="calendar-day empty"
-            key={`empty-${idx}`}
-          />
-
-        ))}
-
-        {Array.from({
-          length:new Date(
-            calendarMonth.getFullYear(),
-            calendarMonth.getMonth() + 1,
-            0
-          ).getDate()
-        }).map((_,idx)=>{
-
-          const dia =
-          idx + 1;
-
-          const key =
-          `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
-
-          const eventosDia =
-          presupuestos.filter(p=>
-            fechaKey(p.fecha) === key
-          );
-
-          return(
-
-            <div
-              className="calendar-day"
-              key={key}
+          {eventosDia.map(p=>(
+            <button
+              className="calendar-event"
+              key={p.id}
+              onClick={()=>{
+                setEventosFecha([p]);
+                setModalEventosFecha(true);
+              }}
             >
+              {p.cliente || "Evento"} - {estadoOperativo(p)}
+            </button>
+          ))}
 
-              <div className="calendar-number">
-                {dia}
-              </div>
+        </div>
+      );
 
-              {eventosDia.map(p=>(
+    })}
 
-                <button
-                  className="calendar-event"
-                  key={p.id}
-                  onClick={()=>
-                    abrirPresupuestoDesdeCalendario(p.id)
-                  }
-                >
-                  {p.cliente || "Evento"} - {p.estado || "sin estado"}
-                </button>
+  </div>
 
-              ))}
-
+</div>
             </div>
+          </>
+        )}
 
-          );
-
-        })}
-
-      </div>
-
-    </div>
-
-  </>
-
-)}
-
-
-
-        {section==="presupuestos" && (
+        {/* ── PRESUPUESTOS INTERNOS ── */}
+{section === "presupuestos" && (
 
   <>
 
-    <div className="page-title">
-      Preparación Eventos
-    </div>
+    <div className="topbar">
 
-    <div className="search-bar">
+      <div style={{ display:"flex", alignItems:"center", gap:14 }}>
 
-      <input
-        value={busquedaPresupuesto}
-        onChange={e=>
-          setBusquedaPresupuesto(e.target.value)
-        }
-        placeholder="Buscar por cliente, fecha o estado..."
-      />
+        <img
+          src={LOGO}
+          style={{
+            width:56,
+            height:56,
+            borderRadius:18,
+            objectFit:"cover",
+            background:"white",
+            padding:3
+          }}
+        />
 
-    </div>
+        <div>
+          <div className="title">
+            Presupuestos Internos
+          </div>
 
-    {Object.entries(presupuestosAgrupadosPorMes())
-    .map(([mes,items])=>(
-
-      <section
-        className="month-section"
-        key={mes}
-      >
-
-        <div className="month-title">
-          {mes}
+          <div className="subtitle">
+            Gestión completa de eventos
+          </div>
         </div>
 
-        <div className="cards-grid">
+      </div>
 
-          {items.map(p=>{
+      <div style={{
+  display:"flex",
+  gap:12,
+  alignItems:"center",
+  flexWrap:"wrap"
+}}>
 
-            const progreso =
-            calcularProgreso(
-              p.checklist || []
-            );
+  <div style={{ width:320 }}>
 
-            return(
+    <input
+      placeholder="Buscar cliente o número..."
+      value={busqueda}
+      onChange={e=>
+        setBusqueda(e.target.value)
+      }
+    />
+
+  </div>
+
+  <button
+    className="btn btn-green"
+    onClick={nuevoPresupuestoInterno}
+  >
+    + Nuevo presupuesto
+  </button>
+
+</div>
+
+    </div>
+
+    {presupuestosFiltrados.length === 0 && (
+
+      <div className="empty">
+        No hay presupuestos
+      </div>
+
+    )}
+
+    <div className="grid">
+
+      {presupuestosFiltrados.map(p=>{
+
+        const progreso =
+        calcularProgreso(p.checklist || []);
+
+        const preparado =
+        p.etapa === "preparado";
+
+        return(
+
+          <div
+            className="card presupuesto-card"
+            key={p.id}
+          >
+
+            <div className="presupuesto-card-top">
+
+              <div className="presupuesto-main-info">
+
+                <img
+                  src={LOGO}
+                  className="presupuesto-card-logo"
+                />
+
+                <div className="presupuesto-title-box">
+
+                  <div className="presupuesto-cliente">
+                    {p.cliente || "Cliente sin nombre"}
+                  </div>
+
+                  <div className="presupuesto-meta">
+                    Presupuesto #{p.numero || p.id}
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="presupuesto-price-box">
+                ${Number(p.total || 0).toLocaleString()}
+              </div>
+
+            </div>
+
+<div className="estado-editor">
+
+  <span>
+    Estado comercial
+  </span>
+
+  <select
+    value={p.estado || "pendiente"}
+    onChange={e=>
+      cambiarEstadoPresupuesto(
+        p,
+        e.target.value
+      )
+    }
+  >
+    <option value="pendiente">
+      Pendiente
+    </option>
+
+    <option value="presentado">
+      Presentado
+    </option>
+
+    <option value="aceptado">
+      Aceptado
+    </option>
+
+    <option value="rechazado">
+      Rechazado
+    </option>
+  </select>
+
+</div>
+
+            <div className="presupuesto-info-grid">
+
+              <div>
+                <span>Fecha</span>
+                <strong>{p.fecha || "-"}</strong>
+              </div>
+
+              <div>
+                <span>Salón</span>
+                <strong>{p.salon || "-"}</strong>
+              </div>
+
+              <div>
+                <span>Estado</span>
+                <strong>{p.estado || p.etapa || "Pendiente"}</strong>
+              </div>
+
+              <div>
+                <span>Ítems</span>
+                <strong>{(p.materiales || []).length}</strong>
+              </div>
+
+            </div>
+
+            <div className="presupuesto-progress-block">
+
+              <div className="progress-info">
+
+                <span>Checklist</span>
+
+                <strong>
+                  {progreso}%
+                </strong>
+
+              </div>
+
+              <div className="timeline-modern">
+
+                <div
+                  className="timeline-modern-fill"
+                  style={{
+                    width:`${progreso}%`
+                  }}
+                />
+
+              </div>
+
+            </div>
+
+            <div className="presupuesto-actions-modern">
+
+              <button
+                className="btn btn-white"
+                onClick={()=>
+                  abrirEditarPresupuesto(p)
+                }
+              >
+                Editar
+              </button>
+
+              <button
+                className={preparado ? "btn btn-green" : "btn btn-white"}
+                onClick={()=>
+                  abrirChecklist(p)
+                }
+              >
+                Checklist
+              </button>
+
+              <button
+                className="btn btn-primary"
+                onClick={()=>
+                  exportarPDF(p)
+                }
+              >
+                PDF
+              </button>
+
+              <button
+                className="btn btn-danger"
+                onClick={()=>
+                  eliminarPresupuesto(p.id)
+                }
+              >
+                Eliminar
+              </button>
+
+            </div>
+
+            <div className="estado-movimientos">
 
               <div
                 className={
-                  p.id === focusedPresupuestoId
-                  ? "presupuesto-card focused"
-                  : "presupuesto-card"
+                  estaListoParaCargar(p) || estadoOperativo(p) === "cargado"
+                  ? "movimiento-card mov-active"
+                  : "movimiento-card"
                 }
-                key={p.id}
               >
 
-                <div className="presupuesto-header">
+                <div className="mov-dot" />
 
-                  <div>
-
-                    <div className="cliente">
-                      {p.cliente}
-                    </div>
-
-                    <div className="fecha">
-                      {p.fecha}
-                    </div>
-
-                  </div>
-
-                  <div className="estado-pill">
-                    {p.estado}
-                  </div>
-
-                </div>
-
-                <div className="timeline">
-
-                  <div
-                    className="timeline-fill"
-                    style={{
-                      width:`${progreso}%`
-                    }}
-                  />
-
-                </div>
-
-                <div className="progress-label">
-                  {progreso}% completado
-                </div>
-
-                <div className="checklist-list">
-
-                  {(p.checklist || [])
-                  .map((item,idx)=>(
-
-                    <div
-                      className="check-item"
-                      key={item.id || idx}
-                    >
-
-                      <label className="check-label">
-
-                        <input
-                          type="checkbox"
-                          checked={!!item.ready}
-                          onChange={()=>
-                            toggleChecklist(
-                              p,
-                              idx
-                            )
-                          }
-                        />
-
-                        <span>
-                          {item.label}
-                        </span>
-
-                      </label>
-
-                      <button
-                        className="delete-item-btn"
-                        onClick={()=>
-                          eliminarItemChecklist(
-                            p,
-                            idx
-                          )
-                        }
-                        title="Eliminar item"
-                      >
-                        ×
-                      </button>
-
-                    </div>
-
-                  ))}
-
-                </div>
-
-                <div className="add-material-box">
-
-                  <strong>
-                    Agregar material de último momento
-                  </strong>
-
-                  <div className="add-material-row">
-
-                    <select
-                      value={materialExtra[p.id] || ""}
-                      onChange={e=>
-                        setMaterialExtra({
-                          ...materialExtra,
-                          [p.id]:e.target.value
-                        })
-                      }
-                    >
-
-                      <option value="">
-                        Seleccionar material
-                      </option>
-
-                      {materiales.map(m=>(
-
-                        <option
-                          key={m.id}
-                          value={m.id}
-                        >
-                          {m.nombre}
-                        </option>
-
-                      ))}
-
-                    </select>
-
-                    <input
-                      type="number"
-                      min="1"
-                      value={cantidadExtra[p.id] || 1}
-                      onChange={e=>
-                        setCantidadExtra({
-                          ...cantidadExtra,
-                          [p.id]:e.target.value
-                        })
-                      }
-                    />
-
-                    <button
-                      className="btn"
-                      onClick={()=>
-                        agregarMaterialAlChecklist(p)
-                      }
-                    >
-                      Agregar
-                    </button>
-
-                  </div>
-
-                </div>
-
-                <div className="empresas-box">
-
-                  <strong>
-                    Empresas vinculadas
-                  </strong>
-
-                  {(p.empresas || [])
-                  .map((e,idx)=>(
-
-                    <div
-                      key={idx}
-                      className="empresa-row"
-                    >
-
-                      <span>
-                        {e.nombre}
-                      </span>
-
-                      <span>
-                        {
-                          e.presente
-                          ? "✅"
-                          : "⏳"
-                        }
-                      </span>
-
-                    </div>
-
-                  ))}
-
-                </div>
-
-                <div className="actions">
-
-                  <button
-                    className="btn green"
-                    onClick={()=>
-                      cambiarEstado(
-                        p,
-                        "preparado"
-                      )
-                    }
-                  >
-                    Preparado
-                  </button>
-
-                  <button
-                    className="btn warning"
-                    onClick={()=>
-                      marcarListoParaCargar(p)
-                    }
-                  >
-                    Listo para cargar
-                  </button>
-
-                  <button
-                    className="btn"
-                    onClick={()=>
-                      abrirControl(
-                        p,
-                        "carga"
-                      )
-                    }
-                  >
-                    Control carga
-                  </button>
-
-                  <button
-                    className="btn dark"
-                    onClick={()=>
-                      abrirControl(
-                        p,
-                        "regreso"
-                      )
-                    }
-                  >
-                    Control regreso
-                  </button>
-
-                </div>
+                <span>
+                  {
+                    estadoOperativo(p) === "cargado"
+                    ? "Cargado para evento"
+                    : estaListoParaCargar(p)
+                    ? "Listo para cargar"
+                    : "Pendiente de carga"
+                  }
+                </span>
 
               </div>
 
-            );
-
-          })}
-
-        </div>
-
-      </section>
-
-    ))}
-
-  </>
-
-)}
-
-
-
-
-
-
-
-
-       {section==="materiales" && (
-
-  <>
-
-    <div className="page-title">
-      Materiales
-    </div>
-
-    <div className="top-actions">
-
-      <button
-        className="btn green"
-        onClick={abrirNuevoMaterial}
-      >
-        Agregar material
-      </button>
-
-    </div>
-
-    <div className="search-bar">
-
-      <input
-        value={busquedaMaterial}
-        onChange={e=>
-          setBusquedaMaterial(e.target.value)
-        }
-        placeholder="Buscar material..."
-      />
-
-    </div>
-
-    {!busquedaMaterial.trim() && (
-
-      <div className="stat-card">
-        Buscá un material para verlo.
-      </div>
-
-    )}
-
-    {busquedaMaterial.trim() && materialesFiltrados().length === 0 && (
-
-      <div className="stat-card">
-        No se encontraron materiales.
-      </div>
-
-    )}
-
-    {busquedaMaterial.trim() && materialesFiltrados().length > 0 && (
-
-      <div className="cards-grid materiales-grid">
-
-        {materialesFiltrados().map(m=>(
-
-          <div
-            className="material-card"
-            key={m.id}
-          >
-
-            <button
-              className="material-img-button"
-              onClick={()=>
-                m.imagen && setImagenAmpliada(m.imagen)
-              }
-            >
-
-              <img
-                src={m.imagen || "https://placehold.co/500x500?text=Sin+Imagen"}
-                className="material-img"
-              />
-
-            </button>
-
-            <div className="cliente">
-              {m.nombre}
-            </div>
-
-            <div className="stock">
-              Stock: {m.stock}
-            </div>
-
-            {materialAfectadoEnPresupuestos(m).length > 0 && (
-
-              <button
-                className="btn dark"
-                onClick={()=>
-                  setMaterialAfectadoAbierto(
-                    materialAfectadoAbierto === m.id
-                    ? null
-                    : m.id
-                  )
+              <div
+                className={
+                  estaDevueltoCorrecto(p)
+                  ? "movimiento-card mov-active"
+                  : estaDevueltoConFaltantes(p)
+                  ? "movimiento-card mov-warning"
+                  : "movimiento-card"
                 }
               >
-                Afectado a {materialAfectadoEnPresupuestos(m).length} presupuestos
-              </button>
 
-            )}
+                <div className="mov-dot" />
 
-            {materialAfectadoAbierto === m.id && (
+                <span>
+                  {
+                    estaDevueltoCorrecto(p)
+                    ? "Devuelto correcto"
+                    : estaDevueltoConFaltantes(p)
+                    ? "Devuelto con faltantes"
+                    : "Pendiente de regreso"
+                  }
+                </span>
 
-              <div className="affected-box">
+              </div>
 
-                {materialAfectadoEnPresupuestos(m).map(({presupuesto,items})=>(
+            </div>
+
+            {estaDevueltoConFaltantes(p) && detallesRegreso(p).length > 0 && (
+
+              <div className="faltantes-box">
+
+                <strong>
+                  Detalle de regreso
+                </strong>
+
+                {detallesRegreso(p).map((detalle,idx)=>(
 
                   <div
-                    className="affected-row"
-                    key={presupuesto.id}
+                    className="faltante-row"
+                    key={idx}
                   >
-
-                    <strong>
-                      {presupuesto.cliente || "Cliente sin nombre"}
-                    </strong>
-
-                    <span>
-                      {presupuesto.fecha || "Sin fecha"}
-                    </span>
-
-                    <span>
-                      Cantidad: {
-                        items.reduce((total,item)=>
-                          total + cantidadMaterialEnItem(item),
-                          0
-                        )
-                      }
-                    </span>
-
+                    {detalle}
                   </div>
 
                 ))}
@@ -2713,123 +2764,11 @@ checklist.filter(
 
             )}
 
-            <div className="actions">
-
-              <button
-                className="btn"
-                onClick={()=>
-                  abrirEditarMaterial(m)
-                }
-              >
-                Editar
-              </button>
-
-              <button
-                className="btn danger"
-                onClick={()=>
-                  eliminarMaterial(m)
-                }
-              >
-                Eliminar
-              </button>
-
-            </div>
-
           </div>
 
-        ))}
+        );
 
-      </div>
-
-    )}
-
-  </>
-
-)}
-
-
-
-
-
-{section==="empresas" && (
-
-  <>
-
-    <div className="page-title">
-      Empresas
-    </div>
-
-    <div className="top-actions">
-
-      <button
-        className="btn green"
-        onClick={nuevaEmpresa}
-      >
-        + Nueva empresa
-      </button>
-
-    </div>
-
-    <div className="cards-grid">
-
-      {empresas.length === 0 ? (
-
-        <div className="stat-card">
-          No hay empresas cargadas.
-        </div>
-
-      ) : (
-
-        empresas.map(e=>(
-
-          <div
-            className="presupuesto-card"
-            key={e.id}
-          >
-
-            <div className="cliente">
-              {e.nombre || "Empresa sin nombre"}
-            </div>
-
-            <div className="fecha">
-              Servicio: {e.servicio || "-"}
-            </div>
-
-            <div className="fecha">
-              Teléfono: {e.telefono || "-"}
-            </div>
-
-            <div className="fecha">
-              Precio: ${Number(e.precio || 0).toLocaleString()}
-            </div>
-
-            <div className="actions">
-
-              <button
-                className="btn"
-                onClick={()=>
-                  editarEmpresa(e)
-                }
-              >
-                Editar
-              </button>
-
-              <button
-                className="btn danger"
-                onClick={()=>
-                  eliminarEmpresa(e)
-                }
-              >
-                Eliminar
-              </button>
-
-            </div>
-
-          </div>
-
-        ))
-
-      )}
+      })}
 
     </div>
 
@@ -2839,452 +2778,279 @@ checklist.filter(
 
 
 
-
-{section==="eventos" && (
-
-  <>
-
-    <div className="page-title">
-      Eventos
-    </div>
-
-    <div className="cards-grid">
-
-      {presupuestos.length === 0 ? (
-
-        <div className="stat-card">
-          No hay eventos cargados.
-        </div>
-
-      ) : (
-
-        presupuestos.map(p=>(
-
-          <div
-            className="event-card"
-            key={p.id}
-          >
-
-            <div className="event-date">
-              {p.fecha || "Sin fecha"}
-            </div>
-
-            <div className="event-client">
-              {p.cliente || "Cliente sin nombre"}
-            </div>
-
-            {p.estado && (
-              <div className="badge">
-                {p.estado}
+        {/* ── PRESUPUESTOS FORMALES ── */}
+        {section === "presupuestosFormales" && (
+          <>
+            <div className="topbar">
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <img src={LOGO} style={{ width: 56, height: 56, borderRadius: 18, objectFit: "cover", background: "white", padding: 3 }} />
+                <div>
+                  <div className="title">Presupuestos Formales</div>
+                  <div className="subtitle">Documentos para clientes</div>
+                </div>
               </div>
+              <button className="btn btn-green" onClick={nuevoFormal}>+ Nuevo Presupuesto</button>
+            </div>
+
+            <div className="card">
+              <input className="input" placeholder="Buscar por cliente..." value={busquedaFormal} onChange={e => setBusquedaFormal(e.target.value)} />
+            </div>
+
+            {presupuestosFormalesFiltrados.length === 0 && (
+              <div className="empty">No hay presupuestos formales</div>
             )}
 
-          </div>
+            <div className="admin-list">
+              {presupuestosFormalesFiltrados.map(p => (
+                <div className="card" key={p.id}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+                    <div>
+                      <div className="cliente">{p.cliente}</div>
+                      <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 12 }}>
+                        <div className="mini-badge">📅 {p.fecha || "-"}</div>
+                        <div className="mini-badge">📦 {(p.items || []).length} ítems</div>
+                        <div className="mini-badge" style={{ color: "#b98558", background: "rgba(185,133,88,.12)" }}>
+                          💰 ${Number(p.total || 0).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <button className="btn btn-blue" onClick={() => exportarFormalPDF(p)}>📄 PDF</button>
+                      <button className="btn btn-primary" onClick={() => { setFormalEditando(p); setModalFormal(true); }}>Editar</button>
+                      <button className="btn btn-danger" onClick={() => eliminarFormal(p.id)}>Eliminar</button>
+                    </div>
+                  </div>
+                  {p.notas && (
+                    <div style={{ marginTop: 14, opacity: .7, fontSize: 14 }}>📝 {p.notas}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-        ))
+        {/* ── MATERIALES ── */}
+        {section === "materiales" && (
+          <>
+            <div className="topbar">
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <img src={LOGO} style={{ width: 56, height: 56, borderRadius: 18, objectFit: "cover", background: "white", padding: 3 }} />
+                <div>
+                  <div className="title">Materiales</div>
+                  <div className="subtitle">Inventario general</div>
+                </div>
+              </div>
+              <div style={{
+  display:"flex",
+  gap:12,
+  flexWrap:"wrap",
+  alignItems:"center"
+}}>
 
-      )}
+  <input
+    style={{ width:260, marginTop:0 }}
+    placeholder="Buscar material..."
+    value={busquedaMaterial}
+    onChange={e=>
+      setBusquedaMaterial(e.target.value)
+    }
+  />
 
-    </div>
+  <button
+    className="btn btn-primary"
+    onClick={exportarMaterialesPDF}
+  >
+    📄 Exportar PDF
+  </button>
 
-  </>
-
-)}
-
-
-
-{materialEditando && (
-
-  <div className="modal-backdrop">
-
-    <div className="modal">
-
-      <div className="modal-header">
-
-        <h2>
-  {
-    materialEditando.id
-    ? "Editar material"
-    : "Agregar material"
-  }
-</h2>
-
-        <button
-          className="modal-close"
-          onClick={cerrarModalMaterial}
-        >
-          ×
-        </button>
-
-      </div>
-
-      <label className="form-field">
-        Nombre
-
-        <input
-          value={materialForm.nombre}
-          onChange={e=>
-            setMaterialForm({
-              ...materialForm,
-              nombre:e.target.value
-            })
-          }
-        />
-
-      </label>
-
-      <label className="form-field">
-        Stock
-
-        <input
-          type="number"
-          value={materialForm.stock}
-          onChange={e=>
-            setMaterialForm({
-              ...materialForm,
-              stock:e.target.value
-            })
-          }
-        />
-
-      </label>
-
-      <div className="form-field">
-
-  <span>
-    Imagen
-  </span>
-
-  {imagenMaterialPreview && (
-    <img
-      src={imagenMaterialPreview}
-      className="material-img"
-    />
-  )}
-
-  <label className="upload-btn">
-
-    Subir nueva imagen
-
-    <input
-      type="file"
-      accept="image/*"
-      onChange={seleccionarImagenMaterial}
-    />
-
-  </label>
+  <button
+    className="btn btn-green"
+    onClick={()=>{
+      setMaterialEditando({
+        nombre:"",
+        stock:0,
+        costo:0,
+        precio:0,
+        imagen:""
+      });
+      setModalMaterial(true);
+    }}
+  >
+    + Nuevo Material
+  </button>
 
 </div>
-
-      {materialForm.imagen && (
-        <img
-          src={materialForm.imagen}
-          className="material-img"
-        />
-      )}
-
-      <div className="actions">
-
-        <button
-          className="btn"
-          onClick={cerrarModalMaterial}
-        >
-          Cancelar
-        </button>
-
-        <button
-          className="btn green"
-          onClick={guardarMaterial}
-          disabled={guardandoMaterial}
-        >
-          {
-            guardandoMaterial
-            ? "Guardando..."
-            : "Guardar"
-          }
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-)}
-
-
-
-{controlModal && (
-
-  <div className="modal-backdrop">
-
-    <div className="modal wide">
-
-      <div className="modal-header">
-
-        <h2>
-          {
-            controlModal.tipo === "carga"
-            ? "Control de carga"
-            : "Control de regreso"
-          }
-        </h2>
-
-        <button
-          className="modal-close"
-          onClick={cerrarControl}
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div className="control-list">
-
-        {(controlModal.presupuesto.checklist || [])
-        .map((item,idx)=>(
-
-          <div
-            className="control-row"
-            key={item.id || idx}
-          >
-
-            <div className="control-row-title">
-              {item.label}
             </div>
 
-            {controlModal.tipo === "carga" && (
+            {!busquedaMaterial.trim() && (
+  <div className="empty">
+    Buscá un material para verlo.
+  </div>
+)}
 
-              <label>
+{busquedaMaterial.trim() && materialesFiltrados.length === 0 && (
+  <div className="empty">
+    No se encontraron materiales.
+  </div>
+)}
 
-                <span>
-                  Cargado para el evento
-                </span>
-
-                <input
-                  type="checkbox"
-                  checked={!!item.cargado}
-                  onChange={e=>
-                    actualizarItemControl(
-                      idx,
-                      {
-                        cargado:e.target.checked
-                      }
-                    )
-                  }
-                />
-
-              </label>
-
-            )}
-
-            {controlModal.tipo === "regreso" && (
-
-              <>
-
-                <div className="control-grid">
-
-                  <label>
-                    Enviado
-
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.enviado || cantidadItem(item)}
-                      onChange={e=>
-                        actualizarItemControl(
-                          idx,
-                          {
-                            enviado:Number(e.target.value)
-                          }
-                        )
-                      }
+            <div className="grid">
+              {materialesFiltrados.map(mat => (
+                <div className="card" key={mat.id}>
+                  <div style={{ width: "100%", height: 220, borderRadius: 24, overflow: "hidden", cursor: "pointer" }}
+                    onClick={() => mat.imagen && setImagenPreview(mat.imagen)}>
+                    <img
+                      src={mat.imagen || "https://placehold.co/600x400?text=Sin+Imagen"}
+                      onError={e => { e.target.src = "https://placehold.co/600x400?text=Sin+Imagen"; }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
-
-                  </label>
-
-                  <label>
-                    Recibido
-
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.recibido || ""}
-                      onChange={e=>{
-
-                        const recibido =
-                        Number(e.target.value);
-
-                        const enviado =
-                        Number(item.enviado || cantidadItem(item));
-
-                        actualizarItemControl(
-                          idx,
-                          {
-                            recibido,
-                            regreso_ok:recibido === enviado
-                          }
-                        );
-
-                      }}
-                    />
-
-                  </label>
-
-                </div>
-
-                <label>
-
-                  <span>
-                    Volvió correctamente
-                  </span>
-
-                  <input
-                    type="checkbox"
-                    checked={!!item.regreso_ok}
-                    onChange={e=>{
-
-                      const enviado =
-                      Number(item.enviado || cantidadItem(item));
-
-                      actualizarItemControl(
-                        idx,
-                        {
-                          regreso_ok:e.target.checked,
-                          recibido:e.target.checked
-                          ? enviado
-                          : (item.recibido || "")
-                        }
-                      );
-
-                    }}
-                  />
-
-                </label>
-
-                {!item.regreso_ok && (
-
-                  <label>
-                    Detalle si volvió menos o con problema
-
-                    <textarea
-                      value={item.regreso_detalle || ""}
-                      onChange={e=>
-                        actualizarItemControl(
-                          idx,
-                          {
-                            regreso_detalle:e.target.value
-                          }
-                        )
-                      }
-                    />
-
-                  </label>
-
-                )}
-
-                {item.stock_devuelto && (
-                  <div className="badge">
-                    Stock ya devuelto
                   </div>
-                )}
+                  <div style={{ marginTop: 18 }}>
+                    <div className="cliente">{mat.nombre}</div>
+                    <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                      <div><strong>Stock:</strong> {mat.stock}</div>
+                      <div><strong>Costo:</strong> ${Number(mat.costo || 0).toLocaleString()}</div>
+                      <div><strong>Venta:</strong> ${Number(mat.precio || 0).toLocaleString()}</div>
+                    </div>
+                    <div className="actions">
+                      <button className="btn btn-primary" onClick={() => { setMaterialEditando(mat); setModalMaterial(true); }}>Editar</button>
+                      <button className="btn btn-danger" onClick={() => eliminarMaterial(mat.id)}>Eliminar</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-              </>
+        {/* ── COLABORADORES ── */}
+        {section === "colaboradores" && (
+          <>
+            <div className="topbar">
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <img src={LOGO} style={{ width: 56, height: 56, borderRadius: 18, objectFit: "cover", background: "white", padding: 3 }} />
+                <div>
+                  <div className="title">Colaboradores</div>
+                  <div className="subtitle">Gestión de equipo</div>
+                </div>
+              </div>
+              <button className="btn btn-green" onClick={() => { setColaboradorEditando({ nombre: "", telefono: "", rol: "" }); setModalColaborador(true); }}>+ Nuevo Colaborador</button>
+            </div>
 
-            )}
+            {colaboradores.length === 0 && <div className="empty">No hay colaboradores</div>}
 
-          </div>
+            <div className="admin-list">
+              {colaboradores.map(c => (
+                <div className="admin-row" key={c.id}>
+                  <div className="admin-main">
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                      <div style={{ width: 58, height: 58, borderRadius: 18, background: "linear-gradient(135deg,#d6b08a,#b98558)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 22, flexShrink: 0 }}>
+                        {(c.nombre || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="admin-title">{c.nombre}</div>
+                        <div className="admin-info">
+                          <div className="mini-badge">👤 {c.rol || "Sin rol"}</div>
+                          <div className="mini-badge">📞 {c.telefono || "-"}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="admin-actions">
+                    <button className="btn btn-primary" onClick={() => { setColaboradorEditando(c); setModalColaborador(true); }}>Editar</button>
+                    <button className="btn btn-danger" onClick={() => eliminarColaborador(c.id)}>Eliminar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-        ))}
+        {/* ── PROVEEDORES / EMPRESAS ── */}
+        {section === "proveedores" && (
+          <>
+            <div className="topbar">
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <img src={LOGO} style={{ width: 56, height: 56, borderRadius: 18, objectFit: "cover", background: "white", padding: 3 }} />
+                <div>
+                  <div className="title">Empresas</div>
+                  <div className="subtitle">Proveedores y servicios</div>
+                </div>
+              </div>
+              <button className="btn btn-green" onClick={() => { setProveedorEditando({ nombre: "", telefono: "", servicio: "", precio: 0 }); setModalProveedor(true); }}>+ Nueva Empresa</button>
+            </div>
 
-      </div>
+            {proveedores.length === 0 && <div className="empty">No hay empresas</div>}
 
-      <div className="actions">
+            <div className="admin-list">
+              {proveedores.map(p => (
+                <div className="admin-row" key={p.id}>
+                  <div className="admin-main">
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                      <div style={{ width: 58, height: 58, borderRadius: 18, background: "linear-gradient(135deg,#6ea8d6,#4a8ec2)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 22, flexShrink: 0 }}>
+                        {(p.nombre || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="admin-title">{p.nombre}</div>
+                        <div className="admin-info">
+                          <div className="mini-badge">🔧 {p.servicio || "-"}</div>
+                          <div className="mini-badge">📞 {p.telefono || "-"}</div>
+                          <div className="mini-badge">💰 ${Number(p.precio || 0).toLocaleString()}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="admin-actions">
+                    <button className="btn btn-primary" onClick={() => { setProveedorEditando(p); setModalProveedor(true); }}>Editar</button>
+                    <button className="btn btn-danger" onClick={() => eliminarProveedor(p.id)}>Eliminar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-        <button
-          className="btn"
-          onClick={cerrarControl}
-        >
-          Cancelar
-        </button>
-
-        <button
-          className="btn green"
-          onClick={
-            controlModal.tipo === "carga"
-            ? guardarControlCarga
-            : guardarControlRegreso
-          }
-        >
-          Guardar progreso
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-)}
+        {/* ══════════ MODALES ══════════ */}
 
 
 
-{imagenAmpliada && (
+{modalPresupuesto && presupuestoEditando && (
 
   <div
-    className="image-viewer"
+    className="modalOverlay"
     onClick={()=>
-      setImagenAmpliada(null)
-    }
-  >
-
-    <button
-      className="image-viewer-close"
-      onClick={()=>
-        setImagenAmpliada(null)
-      }
-    >
-      ×
-    </button>
-
-    <img
-      src={imagenAmpliada}
-      className="image-viewer-img"
-    />
-
-  </div>
-
-)}
-
-{modalProveedor && proveedorEditando && (
-
-  <div
-    className="modal"
-    onClick={()=>
-      setModalProveedor(false)
+      setModalPresupuesto(false)
     }
   >
 
     <div
-      className="modal-box"
-      style={{ maxWidth:500 }}
+      className="modalContent"
+      style={{ maxWidth: 920 }}
       onClick={e=>e.stopPropagation()}
     >
 
       <div className="flex-between">
 
-        <div style={{ fontSize:22, fontWeight:800 }}>
-          {
-            proveedorEditando.id
-            ? "Editar Empresa"
-            : "Nueva Empresa"
-          }
+        <div>
+
+          <div className="title">
+            {
+              presupuestoEditando.id
+              ? "Editar presupuesto interno"
+              : "Nuevo presupuesto interno"
+            }
+          </div>
+
+          <div className="subtitle">
+            Cliente, fecha, salón, materiales, colaboradores y empresas
+          </div>
+
         </div>
 
         <button
           className="btn btn-danger"
           onClick={()=>
-            setModalProveedor(false)
+            setModalPresupuesto(false)
           }
         >
           ✕
@@ -3292,50 +3058,406 @@ checklist.filter(
 
       </div>
 
-      <label>Nombre de empresa</label>
-      <input
-        value={proveedorEditando.nombre || ""}
-        onChange={e=>
-          setProveedorEditando({
-            ...proveedorEditando,
-            nombre:e.target.value
-          })
-        }
-      />
+      <div style={{
+        display:"grid",
+        gridTemplateColumns:"1fr 1fr",
+        gap:18
+      }}>
 
-      <label>Teléfono</label>
-      <input
-        value={proveedorEditando.telefono || ""}
-        onChange={e=>
-          setProveedorEditando({
-            ...proveedorEditando,
-            telefono:e.target.value
-          })
-        }
-      />
+        <div>
+          <label>Cliente</label>
 
-      <label>Servicio</label>
-      <input
-        value={proveedorEditando.servicio || ""}
-        onChange={e=>
-          setProveedorEditando({
-            ...proveedorEditando,
-            servicio:e.target.value
-          })
-        }
-      />
+          <input
+            value={presupuestoEditando.cliente || ""}
+            onChange={e=>
+              actualizarCampoPresupuesto(
+                "cliente",
+                e.target.value
+              )
+            }
+          />
+        </div>
 
-      <label>Precio</label>
-      <input
-        type="number"
-        value={proveedorEditando.precio || 0}
-        onChange={e=>
-          setProveedorEditando({
-            ...proveedorEditando,
-            precio:e.target.value
-          })
-        }
-      />
+        <div>
+          <label>Fecha</label>
+
+          <input
+            type="date"
+            value={presupuestoEditando.fecha || ""}
+            onChange={e=>
+              actualizarCampoPresupuesto(
+                "fecha",
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label>Salón</label>
+
+          <input
+            value={presupuestoEditando.salon || ""}
+            onChange={e=>
+              actualizarCampoPresupuesto(
+                "salon",
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label>Presupuesto N°</label>
+
+          <input
+            type="number"
+            value={presupuestoEditando.numero || ""}
+            readOnly
+          />
+        </div>
+
+      </div>
+
+      <div style={{
+        marginTop:28,
+        display:"flex",
+        justifyContent:"space-between",
+        alignItems:"center",
+        gap:12
+      }}>
+
+        <div className="section-title">
+          Materiales
+        </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={agregarItemPresupuesto}
+        >
+          + Agregar material
+        </button>
+
+      </div>
+
+      <div className="items-editor">
+
+        {(presupuestoEditando.materiales || []).length === 0 && (
+
+          <div className="empty" style={{ padding:"18px 0" }}>
+            Sin materiales cargados
+          </div>
+
+        )}
+
+        {(presupuestoEditando.materiales || []).map((item,idx)=>(
+
+          <div
+            className="item-row"
+            key={idx}
+          >
+
+            <select
+              value={item.id || ""}
+              onChange={e=>
+                actualizarItemPresupuesto(
+                  idx,
+                  "id",
+                  e.target.value
+                )
+              }
+            >
+
+              <option value="">
+                Seleccionar material
+              </option>
+
+              {materiales.map(m=>(
+
+                <option
+                  key={m.id}
+                  value={m.id}
+                >
+                  {m.nombre}
+                </option>
+
+              ))}
+
+            </select>
+
+            <input
+              type="number"
+              placeholder="Cant."
+              style={{ width:80 }}
+              value={item.cantidad || 1}
+              onChange={e=>
+                actualizarItemPresupuesto(
+                  idx,
+                  "cantidad",
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              type="number"
+              placeholder="Precio"
+              style={{ width:110 }}
+              value={item.precio || 0}
+              onChange={e=>
+                actualizarItemPresupuesto(
+                  idx,
+                  "precio",
+                  e.target.value
+                )
+              }
+            />
+
+            <button
+              className="btn btn-danger"
+              style={{ padding:"10px 14px" }}
+              onClick={()=>
+                eliminarItemPresupuesto(idx)
+              }
+            >
+              ✕
+            </button>
+
+          </div>
+
+        ))}
+
+      </div>
+
+      <div style={{
+        marginTop:28,
+        display:"flex",
+        justifyContent:"space-between",
+        alignItems:"center",
+        gap:12
+      }}>
+
+        <div className="section-title">
+          Colaboradores
+        </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={agregarColaboradorPresupuesto}
+        >
+          + Agregar colaborador
+        </button>
+
+      </div>
+
+      <div className="items-editor">
+
+        {(presupuestoEditando.colaboradores || []).length === 0 && (
+
+          <div className="empty" style={{ padding:"18px 0" }}>
+            Sin colaboradores cargados
+          </div>
+
+        )}
+
+        {(presupuestoEditando.colaboradores || []).map((item,idx)=>(
+
+          <div
+            className="item-row"
+            key={idx}
+          >
+
+            <select
+              value={item.id || ""}
+              onChange={e=>
+                actualizarColaboradorPresupuesto(
+                  idx,
+                  "id",
+                  e.target.value
+                )
+              }
+            >
+
+              <option value="">
+                Seleccionar colaborador
+              </option>
+
+              {colaboradores.map(c=>(
+
+                <option
+                  key={c.id}
+                  value={c.id}
+                >
+                  {c.nombre}
+                </option>
+
+              ))}
+
+            </select>
+
+            <input
+              type="number"
+              placeholder="Cant."
+              style={{ width:80 }}
+              value={item.cantidad || 1}
+              onChange={e=>
+                actualizarColaboradorPresupuesto(
+                  idx,
+                  "cantidad",
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              type="number"
+              placeholder="Precio"
+              style={{ width:110 }}
+              value={item.precio || 0}
+              onChange={e=>
+                actualizarColaboradorPresupuesto(
+                  idx,
+                  "precio",
+                  e.target.value
+                )
+              }
+            />
+
+            <button
+              className="btn btn-danger"
+              style={{ padding:"10px 14px" }}
+              onClick={()=>
+                eliminarColaboradorPresupuesto(idx)
+              }
+            >
+              ✕
+            </button>
+
+          </div>
+
+        ))}
+
+      </div>
+
+      <div style={{
+        marginTop:28,
+        display:"flex",
+        justifyContent:"space-between",
+        alignItems:"center",
+        gap:12
+      }}>
+
+        <div className="section-title">
+          Empresas
+        </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={agregarProveedorPresupuesto}
+        >
+          + Agregar empresa
+        </button>
+
+      </div>
+
+      <div className="items-editor">
+
+        {(presupuestoEditando.proveedores || []).length === 0 && (
+
+          <div className="empty" style={{ padding:"18px 0" }}>
+            Sin empresas cargadas
+          </div>
+
+        )}
+
+        {(presupuestoEditando.proveedores || []).map((item,idx)=>(
+
+          <div
+            className="item-row"
+            key={idx}
+          >
+
+            <select
+              value={item.id || ""}
+              onChange={e=>
+                actualizarProveedorPresupuesto(
+                  idx,
+                  "id",
+                  e.target.value
+                )
+              }
+            >
+
+              <option value="">
+                Seleccionar empresa
+              </option>
+
+              {proveedores.map(e=>(
+
+                <option
+                  key={e.id}
+                  value={e.id}
+                >
+                  {e.nombre}
+                </option>
+
+              ))}
+
+            </select>
+
+            <input
+              type="number"
+              placeholder="Cant."
+              style={{ width:80 }}
+              value={item.cantidad || 1}
+              onChange={e=>
+                actualizarProveedorPresupuesto(
+                  idx,
+                  "cantidad",
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              type="number"
+              placeholder="Precio"
+              style={{ width:110 }}
+              value={item.precio || 0}
+              onChange={e=>
+                actualizarProveedorPresupuesto(
+                  idx,
+                  "precio",
+                  e.target.value
+                )
+              }
+            />
+
+            <button
+              className="btn btn-danger"
+              style={{ padding:"10px 14px" }}
+              onClick={()=>
+                eliminarProveedorPresupuesto(idx)
+              }
+            >
+              ✕
+            </button>
+
+          </div>
+
+        ))}
+
+      </div>
+
+      <div style={{
+        marginTop:22,
+        textAlign:"right",
+        fontWeight:800,
+        fontSize:24,
+        color:"#b98558"
+      }}>
+        Total: ${Number(presupuestoEditando.total || 0).toLocaleString()}
+      </div>
 
       <div style={{
         display:"flex",
@@ -3347,17 +3469,17 @@ checklist.filter(
         <button
           className="btn btn-ghost"
           onClick={()=>
-            setModalProveedor(false)
+            setModalPresupuesto(false)
           }
         >
           Cancelar
         </button>
 
         <button
-          className="btn btn-primary"
-          onClick={guardarProveedor}
+          className="btn btn-green"
+          onClick={guardarPresupuestoInterno}
         >
-          Guardar
+          Guardar cambios
         </button>
 
       </div>
@@ -3368,24 +3490,517 @@ checklist.filter(
 
 )}
 
+        {/* MODAL CHECKLIST */}
+        {modalChecklist && presupuestoChecklist && (
+          <div className="modal" onClick={() => setModalChecklist(false)}>
+            <div className="modal-box" onClick={e => e.stopPropagation()}>
+              <div className="flex-between">
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                    <img src={LOGO} style={{ width: 56, height: 56, borderRadius: 18, objectFit: "cover", background: "white", padding: 4 }} />
+                    <div>
+                      <div style={{ fontSize: 26, fontWeight: 800 }}>Cree Adoras</div>
+                      <div className="subtitle">Checklist de Taller</div>
+                    </div>
+                  </div>
+                  <div className="section-title">{presupuestoChecklist.cliente}</div>
+                </div>
+                <button className="btn btn-danger" onClick={() => setModalChecklist(false)}>✕</button>
+              </div>
+
+              <div className="checklist">
+                {presupuestoChecklist.checklist.map((item, idx) => (
+                  <div className={`check-item ${item.ready ? "ready" : ""}`} key={item.id}>
+                    <input
+                      type="checkbox"
+                      checked={item.ready}
+                      style={{ width: 22, height: 22, marginTop: 2, flexShrink: 0 }}
+                      onChange={e => {
+                        const copia = { ...presupuestoChecklist };
+                        copia.checklist[idx].ready = e.target.checked;
+                        setPresupuestoChecklist({ ...copia });
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700 }}>{item.label}</div>
+                      <textarea
+                        placeholder="Comentario..."
+                        style={{ marginTop: 10, minHeight: 70 }}
+                        value={item.comentario || ""}
+                        onChange={e => {
+                          const copia = { ...presupuestoChecklist };
+                          copia.checklist[idx].comentario = e.target.value;
+                          setPresupuestoChecklist({ ...copia });
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 28 }}>
+                <button className="btn btn-ghost" onClick={() => setModalChecklist(false)}>Cancelar</button>
+                <button className="btn btn-primary" onClick={guardarChecklist}>Guardar Checklist</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL MATERIAL */}
+        {modalMaterial && materialEditando && (
+          <div className="modal" onClick={() => setModalMaterial(false)}>
+            <div className="modal-box" onClick={e => e.stopPropagation()}>
+              <div className="flex-between">
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                    <img src={LOGO} style={{ width: 56, height: 56, borderRadius: 18, objectFit: "cover", background: "white", padding: 4 }} />
+                    <div>
+                      <div style={{ fontSize: 22, fontWeight: 800 }}>Gestión de Materiales</div>
+                      <div className="subtitle">{materialEditando.id ? "Editar material" : "Nuevo material"}</div>
+                    </div>
+                  </div>
+                </div>
+                <button className="btn btn-danger" onClick={() => setModalMaterial(false)}>✕</button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <div style={{ gridColumn: "1/3" }}>
+                  <label>Nombre</label>
+                  <input value={materialEditando.nombre} onChange={e => setMaterialEditando({ ...materialEditando, nombre: e.target.value })} />
+                </div>
+                <div>
+                  <label>Stock</label>
+                  <input type="number" value={materialEditando.stock} onChange={e => setMaterialEditando({ ...materialEditando, stock: e.target.value })} />
+                </div>
+                <div>
+                  <label>Precio costo</label>
+                  <input type="number" value={materialEditando.costo} onChange={e => setMaterialEditando({ ...materialEditando, costo: e.target.value })} />
+                </div>
+                <div style={{ gridColumn: "1/3" }}>
+                  <label>Precio venta</label>
+                  <input type="number" value={materialEditando.precio} onChange={e => setMaterialEditando({ ...materialEditando, precio: e.target.value })} />
+                </div>
+                <div style={{ gridColumn: "1/3" }}>
+                  <label>Imagen del material</label>
+                  <input type="file" accept="image/*" onChange={e => {
+                    const archivo = e.target.files[0];
+                    if (!archivo) return;
+                    setMaterialEditando({ ...materialEditando, archivoImagen: archivo, imagen: URL.createObjectURL(archivo) });
+                  }} />
+                </div>
+              </div>
+
+              {materialEditando.imagen && (
+                <div style={{ marginTop: 22, height: 260, borderRadius: 24, overflow: "hidden" }}>
+                  <img src={materialEditando.imagen} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 28 }}>
+                <button className="btn btn-ghost" onClick={() => setModalMaterial(false)}>Cancelar</button>
+                <button className="btn btn-primary" onClick={guardarMaterial}>Guardar</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL COLABORADOR */}
+        {modalColaborador && colaboradorEditando && (
+          <div className="modal" onClick={() => setModalColaborador(false)}>
+            <div className="modal-box" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+              <div className="flex-between">
+                <div style={{ fontSize: 22, fontWeight: 800 }}>{colaboradorEditando.id ? "Editar Colaborador" : "Nuevo Colaborador"}</div>
+                <button className="btn btn-danger" onClick={() => setModalColaborador(false)}>✕</button>
+              </div>
+              <label>Nombre</label>
+              <input value={colaboradorEditando.nombre} onChange={e => setColaboradorEditando({ ...colaboradorEditando, nombre: e.target.value })} />
+              <label>Teléfono</label>
+              <input value={colaboradorEditando.telefono} onChange={e => setColaboradorEditando({ ...colaboradorEditando, telefono: e.target.value })} />
+              <label>Rol</label>
+              <input value={colaboradorEditando.rol} onChange={e => setColaboradorEditando({ ...colaboradorEditando, rol: e.target.value })} />
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 28 }}>
+                <button className="btn btn-ghost" onClick={() => setModalColaborador(false)}>Cancelar</button>
+                <button className="btn btn-primary" onClick={guardarColaborador}>Guardar</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL PROVEEDOR */}
+        {modalProveedor && proveedorEditando && (
+          <div className="modal" onClick={() => setModalProveedor(false)}>
+            <div className="modal-box" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+              <div className="flex-between">
+                <div style={{ fontSize: 22, fontWeight: 800 }}>{proveedorEditando.id ? "Editar Empresa" : "Nueva Empresa"}</div>
+                <button className="btn btn-danger" onClick={() => setModalProveedor(false)}>✕</button>
+              </div>
+              <label>Nombre de empresa</label>
+              <input value={proveedorEditando.nombre} onChange={e => setProveedorEditando({ ...proveedorEditando, nombre: e.target.value })} />
+              <label>Teléfono</label>
+              <input value={proveedorEditando.telefono} onChange={e => setProveedorEditando({ ...proveedorEditando, telefono: e.target.value })} />
+              <label>Servicio</label>
+              <input value={proveedorEditando.servicio} onChange={e => setProveedorEditando({ ...proveedorEditando, servicio: e.target.value })} />
+              <label>Precio</label>
+              <input type="number" value={proveedorEditando.precio} onChange={e => setProveedorEditando({ ...proveedorEditando, precio: e.target.value })} />
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 28 }}>
+                <button className="btn btn-ghost" onClick={() => setModalProveedor(false)}>Cancelar</button>
+                <button className="btn btn-primary" onClick={guardarProveedor}>Guardar</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL PRESUPUESTO FORMAL */}
+        {modalFormal && formalEditando && (
+          <div className="modalOverlay" onClick={() => setModalFormal(false)}>
+            <div className="modalContent" style={{ maxWidth: 800 }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                <div>
+                  <div className="title">Presupuesto Formal</div>
+                  <div className="subtitle">Documento para cliente</div>
+                </div>
+                <button className="btn btn-danger" onClick={() => setModalFormal(false)}>✕</button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <div>
+                  <label>Cliente</label>
+                  <input value={formalEditando.cliente || ""} onChange={e => setFormalEditando({ ...formalEditando, cliente: e.target.value })} />
+                </div>
+                <div>
+                  <label>Fecha</label>
+                  <input type="date" value={formalEditando.fecha || ""} onChange={e => setFormalEditando({ ...formalEditando, fecha: e.target.value })} />
+                </div>
+              </div>
+
+              <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <label style={{ margin: 0 }}>Ítems del presupuesto</label>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button className="btn btn-ghost" style={{ padding: "10px 14px", fontSize: 13 }} onClick={() => setModalImportar(true)}>
+                    📥 Importar de Presupuesto interno
+                  </button>
+                  <button className="btn btn-primary" style={{ padding: "10px 14px", fontSize: 13 }} onClick={agregarItemFormal}>
+                    + Agregar ítem
+                  </button>
+                </div>
+              </div>
 
 
-      </main>
+
+              <div className="items-editor">
+                {(formalEditando.items || []).length === 0 && (
+                  <div className="empty" style={{ padding: "20px 0" }}>Sin ítems — agregá un Item o importá de un presupuesto interno</div>
+                )}
+                {(formalEditando.items || []).map((it, idx) => (
+                  <div className="item-row" key={idx}>
+                    <input placeholder="Descripción" value={it.descripcion || ""} onChange={e => actualizarItemFormal(idx, "descripcion", e.target.value)} />
+                    <input type="number" placeholder="Cant." style={{ width: 70 }} value={it.cantidad} onChange={e => actualizarItemFormal(idx, "cantidad", e.target.value)} />
+                    <input type="number" placeholder="Precio" style={{ width: 100 }} value={it.precio} onChange={e => actualizarItemFormal(idx, "precio", e.target.value)} />
+                    <button className="btn btn-danger" style={{ padding: "10px 14px" }} onClick={() => eliminarItemFormal(idx)}>✕</button>
+                  </div>
+                ))}
+              </div>
+
+<div style={{
+  marginTop:24,
+  display:"flex",
+  justifyContent:"space-between",
+  alignItems:"center"
+}}>
+
+  <label style={{ margin:0 }}>
+    Colaboradores
+  </label>
+
+  <button
+    className="btn btn-primary"
+    style={{ padding:"10px 14px", fontSize:13 }}
+    onClick={agregarColaboradorFormal}
+  >
+    + Agregar colaborador
+  </button>
+
+</div>
+
+<div className="items-editor">
+
+  {(formalEditando.colaboradores || []).map((item,idx)=>(
+
+    <div
+      className="item-row"
+      key={idx}
+    >
+
+      <select
+        value={item.id || ""}
+        onChange={e=>
+          actualizarColaboradorFormal(
+            idx,
+            "id",
+            e.target.value
+          )
+        }
+      >
+
+        <option value="">
+          Seleccionar colaborador
+        </option>
+
+        {colaboradores.map(c=>(
+
+          <option
+            key={c.id}
+            value={c.id}
+          >
+            {c.nombre}
+          </option>
+
+        ))}
+
+      </select>
+
+      <input
+        type="number"
+        placeholder="Cant."
+        style={{ width:70 }}
+        value={item.cantidad || 1}
+        onChange={e=>
+          actualizarColaboradorFormal(
+            idx,
+            "cantidad",
+            e.target.value
+          )
+        }
+      />
+
+      <input
+        type="number"
+        placeholder="Precio"
+        style={{ width:100 }}
+        value={item.precio || 0}
+        onChange={e=>
+          actualizarColaboradorFormal(
+            idx,
+            "precio",
+            e.target.value
+          )
+        }
+      />
+
+      <button
+        className="btn btn-danger"
+        style={{ padding:"10px 14px" }}
+        onClick={()=>
+          eliminarColaboradorFormal(idx)
+        }
+      >
+        ✕
+      </button>
 
     </div>
 
-  );
+  ))}
 
+</div>
+
+<div style={{
+  marginTop:24,
+  display:"flex",
+  justifyContent:"space-between",
+  alignItems:"center"
+}}>
+
+  <label style={{ margin:0 }}>
+    Empresas
+  </label>
+
+  <button
+    className="btn btn-primary"
+    style={{ padding:"10px 14px", fontSize:13 }}
+    onClick={agregarProveedorFormal}
+  >
+    + Agregar empresa
+  </button>
+
+</div>
+
+<div className="items-editor">
+
+  {(formalEditando.proveedores || []).map((item,idx)=>(
+
+    <div
+      className="item-row"
+      key={idx}
+    >
+
+      <select
+        value={item.id || ""}
+        onChange={e=>
+          actualizarProveedorFormal(
+            idx,
+            "id",
+            e.target.value
+          )
+        }
+      >
+
+        <option value="">
+          Seleccionar empresa
+        </option>
+
+        {proveedores.map(p=>(
+
+          <option
+            key={p.id}
+            value={p.id}
+          >
+            {p.nombre}
+          </option>
+
+        ))}
+
+      </select>
+
+      <input
+        type="number"
+        placeholder="Cant."
+        style={{ width:70 }}
+        value={item.cantidad || 1}
+        onChange={e=>
+          actualizarProveedorFormal(
+            idx,
+            "cantidad",
+            e.target.value
+          )
+        }
+      />
+
+      <input
+        type="number"
+        placeholder="Precio"
+        style={{ width:100 }}
+        value={item.precio || 0}
+        onChange={e=>
+          actualizarProveedorFormal(
+            idx,
+            "precio",
+            e.target.value
+          )
+        }
+      />
+
+      <button
+        className="btn btn-danger"
+        style={{ padding:"10px 14px" }}
+        onClick={()=>
+          eliminarProveedorFormal(idx)
+        }
+      >
+        ✕
+      </button>
+
+    </div>
+
+  ))}
+
+</div>
+
+              {(formalEditando.items || []).length > 0 && (
+                <div style={{ marginTop: 16, textAlign: "right", fontWeight: 800, fontSize: 20, color: "#b98558" }}>
+                  Total: ${Number(formalEditando.total || 0).toLocaleString()}
+                </div>
+              )}
+
+              <div>
+                <label>Notas adicionales</label>
+                <textarea rows={4} value={formalEditando.notas || ""} onChange={e => setFormalEditando({ ...formalEditando, notas: e.target.value })} placeholder="Condiciones, observaciones..." />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 28 }}>
+                <button className="btn btn-ghost" onClick={() => setModalFormal(false)}>Cancelar</button>
+                <button className="btn btn-green" onClick={guardarFormal}>💾 Guardar Presupuesto</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL IMPORTAR DESDE INTERNO */}
+        {modalImportar && (
+          <div className="modalOverlay" onClick={() => setModalImportar(false)}>
+            <div className="modalContent" style={{ maxWidth: 700 }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <div>
+                  <div className="title">Importar Presupuesto</div>
+                  <div className="subtitle">Seleccioná un presupuesto interno</div>
+                </div>
+                <button className="btn btn-danger" onClick={() => setModalImportar(false)}>✕</button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {presupuestos.length === 0 && <div className="empty">No hay presupuestos internos</div>}
+                {presupuestos.map(p => (
+                  <div key={p.id} className="card" style={{ padding: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div className="cliente">{p.cliente}</div>
+                      <div style={{ marginTop: 6, opacity: .7, fontSize: 14 }}>{p.fecha} • ${Number(p.total || 0).toLocaleString()}</div>
+                    </div>
+                    <button className="btn btn-green" onClick={() => importarDesdeInterno(p)}>Importar</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL EVENTOS DE FECHA (calendario) */}
+        {modalEventosFecha && (
+          <div className="modalOverlay" onClick={() => setModalEventosFecha(false)}>
+            <div className="modalContent" style={{ maxWidth: 700 }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <div>
+                  <div className="title">Eventos del Día</div>
+                  <div className="subtitle">Presupuestos y estados</div>
+                </div>
+                <button className="btn btn-danger" onClick={() => setModalEventosFecha(false)}>✕</button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {eventosFecha.length === 0 && <div className="empty">No hay eventos para este día</div>}
+                {eventosFecha.map(ev => (
+                  <div key={ev.id} className="card" style={{ padding: 20 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                      <div>
+                        <div className="cliente">{ev.cliente}</div>
+                        <div style={{ marginTop: 6, opacity: .7, fontSize: 14 }}>{ev.fecha}</div>
+                      </div>
+                      <div style={{ padding: "10px 18px", borderRadius: 999, fontWeight: 700, background: ev.etapa === "preparado" ? "#22c55e" : "rgba(185,133,88,.12)", color: ev.etapa === "preparado" ? "#fff" : "#b98558" }}>
+                        {ev.etapa === "preparado" ? "✔ Preparado" : ev.estado || "Pendiente"}
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                      <div><strong>Salón:</strong> <span style={{ opacity: .8 }}>{ev.salon || "-"}</span></div>
+                      <div><strong>Total:</strong> <span style={{ color: "#b98558", fontWeight: 700 }}>${Number(ev.total || 0).toLocaleString()}</span></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PREVIEW IMAGEN */}
+        {imagenPreview && (
+          <div className="modal" onClick={() => setImagenPreview(null)}>
+            <div style={{ maxWidth: "90vw", maxHeight: "90vh" }}>
+              <img src={imagenPreview} style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: 28, display: "block" }} />
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
 }
 
-ReactDOM.createRoot(
-  document.getElementById("root")
-).render(<App/>);
-
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
-
 </body>
 </html>
-
-
-     
