@@ -418,59 +418,35 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function App() {
 
-const [installPrompt,setInstallPrompt] =
-useState(null);
+  const [installPrompt, setInstallPrompt] = useState(null);
 
-const [modalDetallePresupuesto,setModalDetallePresupuesto] = useState(null);
+  const [modalDetallePresupuesto, setModalDetallePresupuesto] = useState(null);
 
-const [busquedaArchivados,setBusquedaArchivados] = useState("");
-const [fechaDesdeArchivados,setFechaDesdeArchivados] = useState("");
-const [fechaHastaArchivados,setFechaHastaArchivados] = useState("");
+  const [busquedaArchivados, setBusquedaArchivados] = useState("");
+  const [fechaDesdeArchivados, setFechaDesdeArchivados] = useState("");
+  const [fechaHastaArchivados, setFechaHastaArchivados] = useState("");
 
+  const [busquedaMaterial, setBusquedaMaterial] = useState("");
+  const [busquedaMaterialKarina, setBusquedaMaterialKarina] = useState("");
 
-const [busquedaMaterial,setBusquedaMaterial] =
-useState("");
+  const [modalAgregarMaterialKarina, setModalAgregarMaterialKarina] = useState(false);
+  const [materialSeleccionadoKarina, setMaterialSeleccionadoKarina] = useState(null);
+  const [cantidadKarina, setCantidadKarina] = useState(1);
+  const [precioKarina, setPrecioKarina] = useState(0);
 
-const [busquedaMaterialKarina,setBusquedaMaterialKarina] =
-useState("");
+  const [modalBuscarMaterial, setModalBuscarMaterial] = useState(false);
+  const [indiceMaterialActual, setIndiceMaterialActual] = useState(null);
 
-const [modalAgregarMaterialKarina,
-setModalAgregarMaterialKarina] =
-useState(false);
+  const [busquedaMaterialModal, setBusquedaMaterialModal] = useState("");
+  const [resultadosMaterialModal, setResultadosMaterialModal] = useState([]);
 
-const [materialSeleccionadoKarina,
-setMaterialSeleccionadoKarina] =
-useState(null);
+  const [modalPresupuesto, setModalPresupuesto] = useState(false);
+  const [presupuestoEditando, setPresupuestoEditando] = useState(null);
 
-const [cantidadKarina,
-setCantidadKarina] =
-useState(1);
-
-const [precioKarina,
-setPrecioKarina] =
-useState(0);
-
-const [modalBuscarMaterial,setModalBuscarMaterial] = useState(false);
-
-const [indiceMaterialActual,setIndiceMaterialActual] = useState(null);
-
-const [busquedaMaterialModal,setBusquedaMaterialModal] = useState("");
-
-const [resultadosMaterialModal,setResultadosMaterialModal] = useState([]);
-
-const [modalPresupuesto,setModalPresupuesto] =
-useState(false);
-
-const [presupuestoEditando,setPresupuestoEditando] =
-useState(null);
-
-
-const [calendarMonth,setCalendarMonth] =
-useState(()=>{
-  const hoy = new Date();
-  return new Date(hoy.getFullYear(),hoy.getMonth(),1);
-});
-
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const hoy = new Date();
+    return new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  });
 
   const [section, setSection] = useState("dashboard");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -495,14 +471,13 @@ useState(()=>{
   const [materialEditando, setMaterialEditando] = useState(null);
 
   const [modalColaborador, setModalColaborador] = useState(false);
-  const [colaboradorEditando,setColaboradorEditando] =
-useState({
-  nombre:"",
-  telefono:"",
-  email:"",
-  dni:"",
-  cuil:""
-});
+  const [colaboradorEditando, setColaboradorEditando] = useState({
+    nombre: "",
+    telefono: "",
+    email: "",
+    dni: "",
+    cuil: ""
+  });
 
   const [modalProveedor, setModalProveedor] = useState(false);
   const [proveedorEditando, setProveedorEditando] = useState(null);
@@ -512,37 +487,43 @@ useState({
 
   const [modalImportar, setModalImportar] = useState(false);
 
-const [modalKarinaBuscar,setModalKarinaBuscar] =
-useState(false);
-
-const [busquedaKarina,setBusquedaKarina] =
-useState("");
-
-const [presupuestoKarina,setPresupuestoKarina] =
-useState(null);
-
-const [materialesKarina,setMaterialesKarina] =
-useState([]);
+  const [modalKarinaBuscar, setModalKarinaBuscar] = useState(false);
+  const [busquedaKarina, setBusquedaKarina] = useState("");
+  const [presupuestoKarina, setPresupuestoKarina] = useState(null);
+  const [materialesKarina, setMaterialesKarina] = useState([]);
 
   const [modalEventosFecha, setModalEventosFecha] = useState(false);
   const [eventosFecha, setEventosFecha] = useState([]);
 
   const [imagenPreview, setImagenPreview] = useState(null);
 
-  useEffect(() => { cargarTodo(); }, []);
+  // ======================
+  // EFFECTS (CORREGIDOS)
+  // ======================
+
+  useEffect(() => {
+    cargarTodo();
+  }, []);
 
   useEffect(() => {
     if (section !== "dashboard") return;
+
     setTimeout(() => {
       const el = document.getElementById("calendar");
       if (!el) return;
+
       el.innerHTML = "";
+
       const cal = new FullCalendar.Calendar(el, {
         initialView: "dayGridMonth",
         locale: "es",
         height: "auto",
         events: eventosCalendario,
-        headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek" },
+        headerToolbar: {
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek"
+        },
         eventClick(info) {
           const fecha = info.event.startStr;
           setEventosFecha(presupuestos.filter(p => p.fecha === fecha));
@@ -553,78 +534,59 @@ useState([]);
           setModalEventosFecha(true);
         }
       });
+
       cal.render();
     }, 100);
   }, [section, eventosCalendario, presupuestos]);
 
-useEffect(()=>{
+  // 🔥 BÚSQUEDA MATERIAL MODAL (ARREGLADO)
+  useEffect(() => {
+    const texto = busquedaMaterialModal.trim().toLowerCase();
 
-  const texto =
-  busquedaMaterialModal.trim().toLowerCase();
+    if (!texto) {
+      setResultadosMaterialModal([]);
+      return;
+    }
 
-  if(!texto){
+    const encontrados = materiales
+      .filter(m =>
+        (m.nombre || "").toLowerCase().includes(texto)
+      )
+      .slice(0, 20);
 
-    setResultadosMaterialModal([]);
+    setResultadosMaterialModal(encontrados);
+  }, [busquedaMaterialModal, materiales]);
 
-    return;
-  }
+  // 📲 PWA INSTALL PROMPT (ARREGLADO)
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
 
+    window.addEventListener("beforeinstallprompt", handler);
 
-useEffect(()=>{
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+    };
+  }, []);
 
-  const handler = e=>{
+  // ======================
+  // FUNCTIONS
+  // ======================
 
-    e.preventDefault();
+  async function instalarApp() {
+    if (!installPrompt) return;
 
-    setInstallPrompt(e);
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+ 
 
-  };
-
-  window.addEventListener(
-    "beforeinstallprompt",
-    handler
+  return (
+    <div>
+      {/* tu JSX acá */}
+    </div>
   );
-
-  return ()=>{
-
-    window.removeEventListener(
-      "beforeinstallprompt",
-      handler
-    );
-
-  };
-
-},[]);
-
-  const encontrados =
-  materiales
-    .filter(m=>
-      (m.nombre || "")
-      .toLowerCase()
-      .includes(texto)
-    )
-    .slice(0,20);
-
-  setResultadosMaterialModal(
-    encontrados
-  );
-
-},[
-  busquedaMaterialModal,
-  materiales
-]);
-
-
-async function instalarApp(){
-
-  if(!installPrompt){
-    return;
-  }
-
-  installPrompt.prompt();
-
-  await installPrompt.userChoice;
-
 }
 
 
