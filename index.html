@@ -6282,17 +6282,25 @@ if ("serviceWorker" in navigator) {
 }
 
 <script type="text/babel">
-  // ... todo tu código de componentes App, funciones, etc. ...
+  // --- AL FINAL DE TU SCRIPT DE BABEL ---
 
-  // REEMPLAZA LA ÚLTIMA LÍNEA POR ESTO:
-  window.addEventListener('load', () => {
-    const rootElement = document.getElementById('root');
-    if (window.React && window.ReactDOM) {
-      ReactDOM.createRoot(rootElement).render(<App />);
-    } else {
-      console.error("React o ReactDOM no cargaron correctamente.");
-    }
-  });
+// 1. Definimos una función para renderizar
+function iniciarApp() {
+  const rootElement = document.getElementById("root");
+  if (rootElement) {
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  }
+}
+
+// 2. Usamos el evento 'DOMContentLoaded' para asegurar que el DOM existe
+// y verificamos que React esté totalmente cargado en el objeto 'window'
+if (window.React && window.ReactDOM) {
+  window.addEventListener('DOMContentLoaded', iniciarApp);
+} else {
+  // Si por latencia de red aún no cargó, esperamos al evento 'load' total
+  window.addEventListener('load', iniciarApp);
+}
 </script>
 </body>
 </html>
