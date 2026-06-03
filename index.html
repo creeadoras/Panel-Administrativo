@@ -405,10 +405,42 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function App() {
 
+const [modalDetallePresupuesto,setModalDetallePresupuesto] = useState(null);
+
+const [busquedaArchivados,setBusquedaArchivados] = useState("");
+const [fechaDesdeArchivados,setFechaDesdeArchivados] = useState("");
+const [fechaHastaArchivados,setFechaHastaArchivados] = useState("");
+
+
 const [busquedaMaterial,setBusquedaMaterial] =
 useState("");
 
+const [busquedaMaterialKarina,setBusquedaMaterialKarina] =
+useState("");
 
+const [modalAgregarMaterialKarina,
+setModalAgregarMaterialKarina] =
+useState(false);
+
+const [materialSeleccionadoKarina,
+setMaterialSeleccionadoKarina] =
+useState(null);
+
+const [cantidadKarina,
+setCantidadKarina] =
+useState(1);
+
+const [precioKarina,
+setPrecioKarina] =
+useState(0);
+
+const [modalBuscarMaterial,setModalBuscarMaterial] = useState(false);
+
+const [indiceMaterialActual,setIndiceMaterialActual] = useState(null);
+
+const [busquedaMaterialModal,setBusquedaMaterialModal] = useState("");
+
+const [resultadosMaterialModal,setResultadosMaterialModal] = useState([]);
 
 const [modalPresupuesto,setModalPresupuesto] =
 useState(false);
@@ -447,7 +479,14 @@ useState(()=>{
   const [materialEditando, setMaterialEditando] = useState(null);
 
   const [modalColaborador, setModalColaborador] = useState(false);
-  const [colaboradorEditando, setColaboradorEditando] = useState(null);
+  const [colaboradorEditando,setColaboradorEditando] =
+useState({
+  nombre:"",
+  telefono:"",
+  email:"",
+  dni:"",
+  cuil:""
+});
 
   const [modalProveedor, setModalProveedor] = useState(false);
   const [proveedorEditando, setProveedorEditando] = useState(null);
@@ -456,6 +495,19 @@ useState(()=>{
   const [formalEditando, setFormalEditando] = useState(null);
 
   const [modalImportar, setModalImportar] = useState(false);
+
+const [modalKarinaBuscar,setModalKarinaBuscar] =
+useState(false);
+
+const [busquedaKarina,setBusquedaKarina] =
+useState("");
+
+const [presupuestoKarina,setPresupuestoKarina] =
+useState(null);
+
+const [materialesKarina,setMaterialesKarina] =
+useState([]);
+
   const [modalEventosFecha, setModalEventosFecha] = useState(false);
   const [eventosFecha, setEventosFecha] = useState([]);
 
@@ -488,6 +540,36 @@ useState(()=>{
       cal.render();
     }, 100);
   }, [section, eventosCalendario, presupuestos]);
+
+useEffect(()=>{
+
+  const texto =
+  busquedaMaterialModal.trim().toLowerCase();
+
+  if(!texto){
+
+    setResultadosMaterialModal([]);
+
+    return;
+  }
+
+  const encontrados =
+  materiales
+    .filter(m=>
+      (m.nombre || "")
+      .toLowerCase()
+      .includes(texto)
+    )
+    .slice(0,20);
+
+  setResultadosMaterialModal(
+    encontrados
+  );
+
+},[
+  busquedaMaterialModal,
+  materiales
+]);
 
 
 async function cargarFuenteTTF(doc,url,nombreFuente){
@@ -522,6 +604,33 @@ async function cargarFuenteTTF(doc,url,nombreFuente){
 }
 
 async function cambiarEstadoPresupuesto(p, estado){
+
+if(nuevoEstado === "aceptado"){
+
+  for(const mat of p.materiales || []){
+
+    const disponible =
+    stockDisponible(
+      mat.id,
+      p.fecha
+    );
+
+    if(
+      Number(mat.cantidad || 0)
+      > disponible
+    ){
+
+      alert(
+        `No hay stock suficiente de ${mat.nombre}`
+      );
+
+      return;
+
+    }
+
+  }
+
+}
 
   const { error } = await db
   .from("presupuestos")
@@ -577,7 +686,9 @@ function nuevoPresupuestoInterno(){
     proveedores:[],
     total:0,
     estado:"pendiente",
-    etapa:"pendiente_preparacion"
+    etapa:"pendiente_preparacion",
+    archivado:false
+
   });
 
   setModalPresupuesto(true);
@@ -598,6 +709,17 @@ function abrirEditarPresupuesto(p){
   setModalPresupuesto(true);
 
 }
+
+function seleccionarPresupuestoKarina(p){
+
+  setPresupuestoKarina(
+    JSON.parse(JSON.stringify(p))
+  );
+
+  setModalKarinaBuscar(false);
+
+}
+
 
 function toggleProveedorPresupuesto(proveedor){
 
@@ -713,20 +835,137 @@ function actualizarCampoPresupuesto(campo,valor){
 
 function agregarItemPresupuesto(){
 
+  const nuevoIndice =
+  (presupuestoEditando.materiales || []).length;
+
   setPresupuestoEditando(prev=>({
     ...prev,
     materiales:[
       ...(prev.materiales || []),
       {
+        tipo:"material",
         id:"",
         nombre:"",
+        imagen:"",
         cantidad:1,
         precio:0
       }
     ]
   }));
 
+  setIndiceMaterialActual(nuevoIndice);
+
+  setBusquedaMaterialModal("");
+
+  setResultadosMaterialModal([]);
+
+  setModalBuscarMaterial(true);
+
 }
+
+function agregarItemEspecial(){
+
+  actualizarTotalesPresupuesto({
+    materiales:[
+      ...(presupuestoEditando.materiales || []),
+
+      {
+        tipo:"especial",
+        nombre:"",
+        descripcion:"",
+        imagen:"",
+        cantidad:1,
+        precio:0
+      }
+    ]
+  });
+
+}
+
+async function subirImagenEspecial(file){
+
+  const ext =
+  file.name.split(".").pop();
+
+  const nombre =
+  `especiales/${Date.now()}_${Math.random()
+    .toString(36)
+    .substring(2)}.${ext}`;
+
+  const { error } =
+  await db.storage
+  .from("imagenes")
+  .upload(
+    nombre,
+    file,
+    {
+      cacheControl:"0",
+      upsert:true
+    }
+  );
+
+  if(error){
+    alert(error.message);
+    return "";
+  }
+
+  return db.storage
+  .from("imagenes")
+  .getPublicUrl(nombre)
+  .data.publicUrl;
+
+}
+
+
+function seleccionarMaterial(material){
+
+//  actualizarItemPresupuesto(
+//    indiceMaterialActual,
+//    "id",
+//    material.id
+//  );
+
+  setPresupuestoEditando(prev=>{
+
+    const items =
+    [...(prev.materiales || [])];
+
+    items[indiceMaterialActual] = {
+
+      ...items[indiceMaterialActual],
+
+      tipo:"material",
+
+      id:material.id,
+
+      nombre:material.nombre,
+
+      imagen:material.imagen || "",
+
+      cantidad:1,
+
+      precio:Number(
+        material.precio || 0
+      )
+
+    };
+
+    return {
+      ...prev,
+      materiales:items,
+      total:recalcularTotalPresupuesto(
+        items,
+        prev.colaboradores || [],
+        prev.proveedores || []
+      )
+    };
+
+  });
+
+  setModalBuscarMaterial(false);
+
+}
+
 
 function actualizarItemPresupuesto(idx,campo,valor){
 
@@ -815,6 +1054,144 @@ function eliminarItemPresupuesto(idx){
   });
 
 }
+
+
+function confirmarAgregarMaterialKarina(){
+
+  if(
+    !materialSeleccionadoKarina ||
+    !presupuestoKarina
+  ){
+    return;
+  }
+
+  setPresupuestoKarina(prev=>{
+
+    const materialesActuales =
+    prev.materiales || [];
+
+    const idx =
+    materialesActuales.findIndex(
+      x =>
+      String(x.id) ===
+      String(
+        materialSeleccionadoKarina.id
+      )
+    );
+
+    if(idx >= 0){
+
+      const nuevos =
+      [...materialesActuales];
+
+      nuevos[idx] = {
+
+        ...nuevos[idx],
+
+        cantidad:
+          Number(
+            nuevos[idx].cantidad || 0
+          ) +
+          Number(cantidadKarina)
+
+      };
+
+      return {
+
+        ...prev,
+
+        materiales:nuevos
+
+      };
+
+    }
+
+    return {
+
+      ...prev,
+
+      materiales:[
+
+        ...materialesActuales,
+
+        {
+
+          id:
+          materialSeleccionadoKarina.id,
+
+          nombre:
+          materialSeleccionadoKarina.nombre,
+
+          imagen:
+          materialSeleccionadoKarina.imagen,
+
+          costo:
+          materialSeleccionadoKarina.costo,
+
+          precio:
+          Number(precioKarina),
+
+          cantidad:
+          Number(cantidadKarina)
+
+        }
+
+      ]
+
+    };
+
+  });
+
+  setModalAgregarMaterialKarina(false);
+
+}
+
+
+function actualizarCantidadKarina(
+  idx,
+  cantidad
+){
+
+  setPresupuestoKarina(prev=>{
+
+    const copia = {
+      ...prev
+    };
+
+    copia.materiales =
+    [...copia.materiales];
+
+    copia.materiales[idx] = {
+
+      ...copia.materiales[idx],
+
+      cantidad:Number(cantidad)
+
+    };
+
+    return copia;
+
+  });
+
+}
+
+
+
+function eliminarMaterialKarina(idx){
+
+  setPresupuestoKarina(prev=>({
+
+    ...prev,
+
+    materiales:
+    prev.materiales.filter(
+      (_,i)=>i!==idx
+    )
+
+  }));
+
+}
+
 
 
 function recalcularTotalPresupuesto(itemsMateriales, itemsColaboradores, itemsProveedores){
@@ -1048,6 +1425,23 @@ function eliminarProveedorPresupuesto(idx){
 
 async function guardarPresupuestoInterno(){
 
+  if(
+    !presupuestoEditando.cliente ||
+    String(presupuestoEditando.cliente).trim() === ""
+  ){
+    alert("⚠️ Debe ingresar el nombre del cliente.");
+    return;
+  }
+
+  if(
+    !presupuestoEditando.fecha ||
+    String(presupuestoEditando.fecha).trim() === ""
+  ){
+    alert("⚠️ Debe seleccionar una fecha para el presupuesto.");
+    return;
+  }
+
+
   const materialesActuales =
   presupuestoEditando.materiales || [];
 
@@ -1086,8 +1480,8 @@ async function guardarPresupuestoInterno(){
   });
 
   const payload = {
-  cliente:presupuestoEditando.cliente || "",
-  fecha:presupuestoEditando.fecha || null,
+  cliente:presupuestoEditando.cliente.trim(),
+  fecha:presupuestoEditando.fecha,
   salon:presupuestoEditando.salon || null,
   numero:presupuestoEditando.numero
     ? Number(presupuestoEditando.numero)
@@ -1098,7 +1492,8 @@ async function guardarPresupuestoInterno(){
   proveedores:presupuestoEditando.proveedores || [],
   total:Number(presupuestoEditando.total || 0),
   estado:presupuestoEditando.estado || "pendiente",
-  etapa:presupuestoEditando.etapa || "pendiente_preparacion"
+  etapa:presupuestoEditando.etapa || "pendiente_preparacion",
+  archivado:presupuestoEditando.archivado || false
 };
 
   let res;
@@ -1132,9 +1527,151 @@ if(res.error){
 
 
 
+async function guardarKarina(){
+
+  if(!presupuestoKarina){
+    return;
+  }
+
+  const materialesActuales =
+  presupuestoKarina.materiales || [];
+
+  const checklistActual =
+  presupuestoKarina.checklist || [];
+
+  const checklistNuevo =
+  materialesActuales.map(item=>{
+
+    const label =
+    `${item.cantidad}x ${item.nombre}`;
+
+    const existente =
+    checklistActual.find(ch=>
+      ch.material_id &&
+      String(ch.material_id) === String(item.id)
+    ) ||
+    checklistActual.find(ch=>
+      ch.label === label
+    );
+
+    return {
+
+      id:
+        existente?.id ||
+        `m-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+
+      material_id:
+        item.id,
+
+      label,
+
+      ready:
+        existente?.ready || false,
+
+      comentario:
+        existente?.comentario || "",
+
+      cargado:
+        existente?.cargado || false,
+
+      enviado:
+        existente?.enviado ||
+        Number(item.cantidad || 1),
+
+      recibido:
+        existente?.recibido || "",
+
+      regreso_ok:
+        existente?.regreso_ok || false,
+
+      regreso_detalle:
+        existente?.regreso_detalle || "",
+
+      stock_devuelto:
+        existente?.stock_devuelto || false
+
+    };
+
+  });
+
+  const { error } =
+  await db
+  .from("presupuestos")
+  .update({
+
+    materiales:
+    materialesActuales,
+
+    checklist:
+    checklistNuevo
+
+  })
+  .eq(
+    "id",
+    presupuestoKarina.id
+  );
+
+  if(error){
+
+    alert(error.message);
+    return;
+
+  }
+
+  alert(
+    "Materiales actualizados"
+  );
+
+  await cargarTodo();
+
+}
+
+
+
 function fechaKey(fecha){
   return fecha ? String(fecha).slice(0,10) : "";
 }
+
+
+function stockDisponible(materialId,fecha){
+
+  const material =
+  materiales.find(m=>
+    String(m.id) === String(materialId)
+  );
+
+  const stockTotal =
+  Number(material?.stock || 0);
+
+  const reservado =
+  presupuestos
+  .filter(p=>
+
+    p.estado === "aceptado" &&
+
+    fechaKey(p.fecha) === fechaKey(fecha)
+
+  )
+  .reduce((sum,p)=>{
+
+    return sum +
+
+    (p.materiales || [])
+    .filter(mat=>
+      String(mat.id) === String(materialId)
+    )
+    .reduce((s,mat)=>
+
+      s + Number(mat.cantidad || 0)
+
+    ,0);
+
+  },0);
+
+  return stockTotal - reservado;
+
+}
+
 
 function cambiarMes(offset){
   setCalendarMonth(prev=>
@@ -1185,6 +1722,29 @@ async function eliminarPresupuesto(id){
 
 }
 
+
+async function archivarPresupuesto(p){
+
+  console.log("ARCHIVAR", p);
+
+  const { error } = await db
+  .from("presupuestos")
+  .update({
+    archivado:true
+  })
+  .eq("id",p.id);
+
+  if(error){
+    console.error(error);
+    alert(error.message);
+    return;
+  }
+
+  alert("Archivado");
+
+  cargarTodo();
+
+}
 
   async function cargarTodo() {
     try {
@@ -1504,7 +2064,9 @@ doc.text(`TOTAL: $${Number(p.total || 0).toLocaleString()}`, 14, y);
     const payload = {
       nombre: colaboradorEditando.nombre || "",
       telefono: colaboradorEditando.telefono || "",
-      rol: colaboradorEditando.rol || ""
+      rol: colaboradorEditando.rol || "",
+      dni: colaboradorEditando.dni || "",
+      cuil: colaboradorEditando.cuil || ""
     };
     if (colaboradorEditando.id) {
       await db.from("colaboradores").update(payload).eq("id", colaboradorEditando.id);
@@ -2236,12 +2798,109 @@ doc.text("Menú",18,38);
   }
 
   const presupuestosFiltrados = useMemo(() => {
-    const t = busqueda.toLowerCase();
-    return presupuestos.filter(p =>
-      (p.cliente || "").toLowerCase().includes(t) ||
-      String(p.numero || "").includes(t)
+
+  const t = busqueda.toLowerCase();
+
+  return presupuestos
+
+    .filter(p => !p.archivado)
+
+    .filter(p =>
+
+      (p.cliente || "")
+      .toLowerCase()
+      .includes(t)
+
+      ||
+
+      String(p.numero || "")
+      .includes(t)
+
     );
-  }, [presupuestos, busqueda]);
+
+}, [presupuestos, busqueda]);
+
+const presupuestosArchivados = useMemo(() => {
+
+  const texto =
+  (busquedaArchivados || "")
+  .toLowerCase();
+
+  return [...presupuestos]
+
+    .filter(p => p.archivado === true)
+
+    .filter(p => {
+
+      const coincideNombre =
+
+        (p.cliente || "")
+        .toLowerCase()
+        .includes(texto)
+
+        ||
+
+        String(p.numero || "")
+        .includes(texto);
+
+      const fechaOk =
+
+        (!fechaDesdeArchivados ||
+          p.fecha >= fechaDesdeArchivados)
+
+        &&
+
+        (!fechaHastaArchivados ||
+          p.fecha <= fechaHastaArchivados);
+
+      return coincideNombre && fechaOk;
+
+    })
+
+    .sort((a,b)=>
+      new Date(b.fecha || 0) -
+      new Date(a.fecha || 0)
+    );
+
+},[
+  presupuestos,
+  busquedaArchivados,
+  fechaDesdeArchivados,
+  fechaHastaArchivados
+]);
+
+
+const archivadosPorMes = useMemo(()=>{
+
+  const grupos = {};
+
+  presupuestosArchivados.forEach(p=>{
+
+    const fecha =
+    new Date(p.fecha);
+
+    const clave =
+    fecha.toLocaleDateString(
+      "es-AR",
+      {
+        month:"long",
+        year:"numeric"
+      }
+    );
+
+    if(!grupos[clave]){
+      grupos[clave] = [];
+    }
+
+    grupos[clave].push(p);
+
+  });
+
+  return grupos;
+
+},[presupuestosArchivados]);
+
+
 
 const materialesFiltrados = useMemo(() => {
 
@@ -2300,10 +2959,12 @@ const materialesFiltrados = useMemo(() => {
         <div className="nav">
           {navBtn("dashboard", "📅 Calendario")}
           {navBtn("presupuestos", "📋 Presupuestos Internos")}
+	  {navBtn("karina", "👑 Karina")}
           {navBtn("presupuestosFormales", "📄 Presupuestos Formales")}
           {navBtn("materiales", "🧰 Materiales")}
           {navBtn("colaboradores", "👥 Colaboradores")}
           {navBtn("proveedores", "🏢 Empresas")}
+          {navBtn("archivados", "📦 Presupuestos Internos Archivados")}
         </div>
       </div>
 
@@ -2620,9 +3281,24 @@ const materialesFiltrados = useMemo(() => {
               </div>
 
               <div>
-                <span>Ítems</span>
-                <strong>{(p.materiales || []).length}</strong>
-              </div>
+
+  <span>Ítems</span>
+
+  <strong
+    style={{
+      cursor:"pointer",
+      color:"#b98558"
+    }}
+    onClick={()=>
+      setModalDetallePresupuesto(p)
+    }
+  >
+    {(p.materiales || []).length}
+    {" "}
+    👁
+  </strong>
+
+</div>
 
             </div>
 
@@ -2688,6 +3364,15 @@ const materialesFiltrados = useMemo(() => {
               >
                 Eliminar
               </button>
+
+<button
+  className="btn btn-white"
+  onClick={()=>
+    archivarPresupuesto(p)
+  }
+>
+  Archivar
+</button>
 
             </div>
 
@@ -2778,6 +3463,733 @@ const materialesFiltrados = useMemo(() => {
 
 
 
+{/* ── KARINA ── */}
+
+{section==="karina" && (
+
+<>
+
+<div className="topbar">
+
+  <div>
+
+    <div className="title">
+      Karina
+    </div>
+
+    <div className="subtitle">
+      Gestión de materiales por evento
+    </div>
+
+  </div>
+
+  <button
+    className="btn btn-green"
+    onClick={()=>
+      setModalKarinaBuscar(true)
+    }
+  >
+    Buscar Presupuesto Interno
+  </button>
+
+</div>
+
+{presupuestoKarina && (
+
+<>
+
+<div className="card">
+
+  <div className="cliente">
+    {presupuestoKarina.cliente}
+  </div>
+
+  <div style={{
+    marginTop:10,
+    opacity:.7
+  }}>
+    {presupuestoKarina.fecha}
+  </div>
+
+</div>
+
+<div
+  style={{
+    marginTop:20,
+    textAlign:"right"
+  }}
+>
+
+  <button
+    className="btn btn-green"
+    onClick={guardarKarina}
+  >
+    Guardar
+  </button>
+
+</div>
+
+
+<div className="card">
+
+  <div className="title">
+    Materiales agregados
+  </div>
+
+  <div className="items-editor">
+
+    {(presupuestoKarina?.materiales || []).map((m,idx)=>(
+
+      <div
+        className="item-row"
+        key={idx}
+        style={{
+          display:"flex",
+          alignItems:"center",
+          gap:"12px",
+          marginBottom:"12px",
+          padding:"12px",
+          border:"1px solid #ddd",
+          borderRadius:"12px"
+        }}
+      >
+
+        <img
+          src={m.imagen}
+          style={{
+            width:70,
+            height:70,
+            objectFit:"cover",
+            borderRadius:12
+          }}
+        />
+
+        <div
+          style={{
+            flex:1
+          }}
+        >
+
+          <div
+            style={{
+              fontWeight:800,
+              marginBottom:4
+            }}
+          >
+            {m.nombre}
+          </div>
+
+          <div
+            style={{
+              fontSize:13,
+              opacity:.7
+            }}
+          >
+            ID: {m.id}
+          </div>
+
+        </div>
+
+        <div
+          style={{
+            display:"flex",
+            flexDirection:"column",
+            gap:"6px"
+          }}
+        >
+
+          <label
+            style={{
+              fontSize:"12px"
+            }}
+          >
+            Cantidad
+          </label>
+
+          <input
+            type="number"
+            min="1"
+            value={m.cantidad}
+            onChange={e=>{
+
+              const nuevos =
+              [...presupuestoKarina.materiales];
+
+              nuevos[idx] = {
+                ...nuevos[idx],
+                cantidad:Number(e.target.value)
+              };
+
+              setPresupuestoKarina({
+                ...presupuestoKarina,
+                materiales:nuevos
+              });
+
+            }}
+            style={{
+              width:"90px"
+            }}
+          />
+
+        </div>
+
+        <div
+          style={{
+            display:"flex",
+            flexDirection:"column",
+            gap:"6px"
+          }}
+        >
+
+          <label
+            style={{
+              fontSize:"12px"
+            }}
+          >
+            Precio
+          </label>
+
+          <input
+            type="number"
+            value={m.precio}
+            onChange={e=>{
+
+              const nuevos =
+              [...presupuestoKarina.materiales];
+
+              nuevos[idx] = {
+                ...nuevos[idx],
+                precio:Number(e.target.value)
+              };
+
+              setPresupuestoKarina({
+                ...presupuestoKarina,
+                materiales:nuevos
+              });
+
+            }}
+            style={{
+              width:"120px"
+            }}
+          />
+
+        </div>
+
+        <div
+          style={{
+            minWidth:"120px",
+            textAlign:"right",
+            fontWeight:700
+          }}
+        >
+          $
+          {(
+            Number(m.cantidad || 0) *
+            Number(m.precio || 0)
+          ).toLocaleString()}
+        </div>
+
+        <button
+          className="btn btn-danger"
+          onClick={()=>
+            eliminarMaterialKarina(idx)
+          }
+        >
+          ✕
+        </button>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</div>
+
+<div className="card">
+
+  <div className="title">
+    Catálogo de materiales
+  </div>
+
+  <div className="grid">
+
+<input
+  type="text"
+  placeholder="Buscar material..."
+  value={busquedaMaterialKarina}
+  onChange={e=>
+    setBusquedaMaterialKarina(
+      e.target.value
+    )
+  }
+  style={{
+    width:"100%",
+    padding:"12px",
+    marginBottom:"20px",
+    borderRadius:"12px",
+    border:"1px solid #ddd"
+  }}
+/>
+
+    {materiales
+
+.filter(mat=>
+
+  (mat.nombre || "")
+  .toLowerCase()
+  .includes(
+    busquedaMaterialKarina.toLowerCase()
+  )
+
+)
+
+.sort((a,b)=>
+  (a.nombre || "")
+  .localeCompare(b.nombre || "")
+)
+
+.map(mat=>(
+
+      <div
+        className="card"
+        key={mat.id}
+      >
+
+        <img
+  src={mat.imagen}
+  onClick={()=>
+    setImagenPreview(mat.imagen)
+  }
+  style={{
+    width:"100%",
+    height:180,
+    objectFit:"cover",
+    borderRadius:18,
+    cursor:"pointer"
+  }}
+/>
+
+        <div
+          style={{
+            marginTop:10,
+            fontWeight:800
+          }}
+        >
+          {mat.nombre}
+        </div>
+
+<div
+  style={{
+    marginTop:6,
+    fontSize:13,
+    opacity:.7
+  }}
+>
+  Stock físico: {mat.stock || 0}
+<div
+  style={{
+    fontSize:13,
+    opacity:.7
+  }}
+>
+Disponible para esta fecha:
+
+{
+  presupuestoKarina
+  ? stockDisponible(
+      mat.id,
+      presupuestoKarina.fecha
+    )
+  : mat.stock
+}
+</div>
+</div>
+
+<div
+  style={{
+    fontSize:13,
+    opacity:.7
+  }}
+>
+  Precio: $
+  {Number(mat.precio||0).toLocaleString()}
+</div>
+
+        <button
+  className="btn btn-green"
+  disabled={
+    presupuestoKarina &&
+    stockDisponible(
+      mat.id,
+      presupuestoKarina.fecha
+    ) <= 0
+  }
+  style={{
+    marginTop:12
+  }}
+  onClick={()=>{
+
+    setMaterialSeleccionadoKarina(mat);
+
+    setCantidadKarina(1);
+
+    setPrecioKarina(
+      Number(mat.precio || 0)
+    );
+
+    setModalAgregarMaterialKarina(true);
+
+  }}
+>
+  Agregar
+</button>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</div>
+
+
+</>
+
+)}
+
+</>
+
+)}
+
+
+
+
+{/* ── ARCHIVADOS ── */}
+{section==="archivados" && (
+
+<>
+
+  <div className="topbar">
+
+    <div>
+
+      <div className="title">
+        Presupuestos Archivados
+      </div>
+
+      <div className="subtitle">
+        Historial completo de eventos realizados
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    className="card"
+    style={{
+      marginBottom:20
+    }}
+  >
+
+    <div
+      style={{
+        display:"grid",
+        gridTemplateColumns:
+        "2fr 1fr 1fr",
+        gap:12
+      }}
+    >
+
+      <input
+        placeholder="Buscar cliente o número..."
+        value={busquedaArchivados}
+        onChange={e=>
+          setBusquedaArchivados(
+            e.target.value
+          )
+        }
+      />
+
+      <input
+        type="date"
+        value={fechaDesdeArchivados}
+        onChange={e=>
+          setFechaDesdeArchivados(
+            e.target.value
+          )
+        }
+      />
+
+      <input
+        type="date"
+        value={fechaHastaArchivados}
+        onChange={e=>
+          setFechaHastaArchivados(
+            e.target.value
+          )
+        }
+      />
+
+    </div>
+
+  </div>
+
+  {Object.keys(archivadosPorMes).length === 0 && (
+
+    <div className="empty">
+      No hay presupuestos archivados
+    </div>
+
+  )}
+
+  {Object.entries(archivadosPorMes).map(([mes,items])=>(
+
+    <div
+      key={mes}
+      style={{
+        marginBottom:40
+      }}
+    >
+
+      <div
+        style={{
+          fontSize:28,
+          fontWeight:900,
+          marginBottom:20,
+          textTransform:"capitalize"
+        }}
+      >
+        {mes}
+      </div>
+
+      <div className="grid">
+
+        {items.map(p=>(
+
+          <div
+            className="card presupuesto-card"
+            key={p.id}
+          >
+
+            <div className="presupuesto-card-top">
+
+              <div className="presupuesto-main-info">
+
+                <img
+                  src={LOGO}
+                  className="presupuesto-card-logo"
+                />
+
+                <div>
+
+                  <div
+                    className="presupuesto-cliente"
+                  >
+                    {p.cliente || "Sin nombre"}
+                  </div>
+
+                  <div
+                    className="presupuesto-meta"
+                  >
+                    Presupuesto #{p.numero || p.id}
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div
+                className="presupuesto-price-box"
+              >
+                $
+                {Number(
+                  p.total || 0
+                ).toLocaleString()}
+              </div>
+
+            </div>
+
+            <div
+              className="presupuesto-info-grid"
+            >
+
+              <div>
+
+                <span>Fecha</span>
+
+                <strong>
+                  {p.fecha || "-"}
+                </strong>
+
+              </div>
+
+              <div>
+
+                <span>Salón</span>
+
+                <strong>
+                  {p.salon || "-"}
+                </strong>
+
+              </div>
+
+              <div>
+
+                <span>Estado</span>
+
+                <strong>
+                  {p.estado || "-"}
+                </strong>
+
+              </div>
+
+              <div>
+
+                <span>Materiales</span>
+
+                <strong>
+                  {(p.materiales || [])
+                  .length}
+                </strong>
+
+              </div>
+
+            </div>
+
+            {(p.materiales || []).length > 0 && (
+
+              <div
+                style={{
+                  marginTop:18
+                }}
+              >
+
+                <div
+                  style={{
+                    fontWeight:800,
+                    marginBottom:10
+                  }}
+                >
+                  Materiales utilizados
+                </div>
+
+                <div
+                  style={{
+                    display:"flex",
+                    flexDirection:"column",
+                    gap:8,
+                    maxHeight:180,
+                    overflowY:"auto"
+                  }}
+                >
+
+                  {(p.materiales || []).map((m,idx)=>(
+
+                    <div
+                      key={idx}
+                      style={{
+                        display:"flex",
+                        justifyContent:"space-between",
+                        gap:10,
+                        padding:"8px 10px",
+                        background:"#f8f8f8",
+                        borderRadius:10
+                      }}
+                    >
+
+                      <span>
+                        {m.nombre}
+                      </span>
+
+                      <strong>
+                        {m.cantidad}x
+                      </strong>
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              </div>
+
+            )}
+
+            <div
+              style={{
+                display:"flex",
+                gap:10,
+                marginTop:20,
+                flexWrap:"wrap"
+              }}
+            >
+
+              <button
+                className="btn btn-primary"
+                onClick={()=>
+                  exportarPDF(p)
+                }
+              >
+                PDF
+              </button>
+
+              <button
+                className="btn btn-white"
+                onClick={()=>
+                  abrirEditarPresupuesto(p)
+                }
+              >
+                Ver detalle
+              </button>
+
+              <button
+                className="btn btn-green"
+                onClick={async()=>{
+
+                  const { error } =
+                  await db
+                  .from("presupuestos")
+                  .update({
+                    archivado:false
+                  })
+                  .eq("id",p.id);
+
+                  if(error){
+
+                    alert(
+                      error.message
+                    );
+
+                    return;
+
+                  }
+
+                  cargarTodo();
+
+                }}
+              >
+                Restaurar
+              </button>
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </div>
+
+  ))}
+
+</>
+
+)}
+
+
         {/* ── PRESUPUESTOS FORMALES ── */}
         {section === "presupuestosFormales" && (
           <>
@@ -2828,6 +4240,9 @@ const materialesFiltrados = useMemo(() => {
             </div>
           </>
         )}
+
+
+
 
         {/* ── MATERIALES ── */}
         {section === "materiales" && (
@@ -2909,6 +4324,36 @@ const materialesFiltrados = useMemo(() => {
                     <div className="cliente">{mat.nombre}</div>
                     <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
                       <div><strong>Stock:</strong> {mat.stock}</div>
+		      {presupuestos
+.filter(p=>
+
+  p.estado === "aceptado" &&
+
+  (p.materiales || [])
+  .some(m=>
+    String(m.id) === String(mat.id)
+  )
+
+)
+.map(p=>(
+
+  <div
+    key={p.id}
+    style={{
+      fontSize:12,
+      marginTop:4,
+      color:"#b98558"
+    }}
+  >
+
+    Reservado:
+    {p.cliente}
+    -
+    {p.fecha}
+
+  </div>
+
+))}
                       <div><strong>Costo:</strong> ${Number(mat.costo || 0).toLocaleString()}</div>
                       <div><strong>Venta:</strong> ${Number(mat.precio || 0).toLocaleString()}</div>
                     </div>
@@ -2934,7 +4379,7 @@ const materialesFiltrados = useMemo(() => {
                   <div className="subtitle">Gestión de equipo</div>
                 </div>
               </div>
-              <button className="btn btn-green" onClick={() => { setColaboradorEditando({ nombre: "", telefono: "", rol: "" }); setModalColaborador(true); }}>+ Nuevo Colaborador</button>
+              <button className="btn btn-green" onClick={() => { setColaboradorEditando({ nombre: "", telefono: "", rol: "", dni: "", cuil: ""}); setModalColaborador(true); }}>+ Nuevo Colaborador</button>
             </div>
 
             {colaboradores.length === 0 && <div className="empty">No hay colaboradores</div>}
@@ -2948,12 +4393,39 @@ const materialesFiltrados = useMemo(() => {
                         {(c.nombre || "?").charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="admin-title">{c.nombre}</div>
-                        <div className="admin-info">
-                          <div className="mini-badge">👤 {c.rol || "Sin rol"}</div>
-                          <div className="mini-badge">📞 {c.telefono || "-"}</div>
-                        </div>
-                      </div>
+  <div className="admin-title">
+    {c.nombre}
+  </div>
+
+  <div className="admin-info">
+    <div className="mini-badge">
+      👤 {c.rol || "Sin rol"}
+    </div>
+
+    <div className="mini-badge">
+      📞 {c.telefono || "-"}
+    </div>
+  </div>
+
+  <div
+    style={{
+      marginTop:6,
+      fontSize:12,
+      opacity:.75
+    }}
+  >
+    DNI: {c.dni || "-"}
+  </div>
+
+  <div
+    style={{
+      fontSize:12,
+      opacity:.75
+    }}
+  >
+    CUIL: {c.cuil || "-"}
+  </div>
+</div>
                     </div>
                   </div>
                   <div className="admin-actions">
@@ -3011,6 +4483,109 @@ const materialesFiltrados = useMemo(() => {
         )}
 
         {/* ══════════ MODALES ══════════ */}
+
+
+{modalBuscarMaterial && (
+
+<div
+  style={{
+    position:"fixed",
+    inset:0,
+    background:"rgba(0,0,0,.75)",
+    display:"flex",
+    alignItems:"center",
+    justifyContent:"center",
+    padding:"20px",
+    zIndex:12000
+  }}
+>
+
+  <div
+    className="modal-box"
+    style={{maxWidth:"900px"}}
+  >
+
+    <div className="section-title">
+      Buscar material
+    </div>
+
+    <input
+      placeholder="Escribí nombre..."
+      value={busquedaMaterialModal}
+      onChange={e=>
+        setBusquedaMaterialModal(
+          e.target.value
+        )
+      }
+    />
+
+    {busquedaMaterialModal && (
+
+      <div
+        style={{
+          marginTop:20,
+          display:"grid",
+          gridTemplateColumns:
+          "repeat(auto-fill,minmax(220px,1fr))",
+          gap:14
+        }}
+      >
+
+        {resultadosMaterialModal.map(m=>(
+
+          <div
+            key={m.id}
+            className="card"
+            style={{
+              cursor:"pointer"
+            }}
+            onClick={()=>
+              seleccionarMaterial(m)
+            }
+          >
+
+            {m.imagen && (
+
+              <img
+                src={m.imagen}
+                style={{
+                  width:"100%",
+                  height:180,
+                  objectFit:"cover",
+                  borderRadius:16
+                }}
+              />
+
+            )}
+
+            <div
+              style={{
+                marginTop:10,
+                fontWeight:800
+              }}
+            >
+              {m.nombre}
+            </div>
+
+            <div>
+              ${Number(
+                m.precio || 0
+              ).toLocaleString()}
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+</div>
+
+)}
 
 
 
@@ -3132,11 +4707,18 @@ const materialesFiltrados = useMemo(() => {
         </div>
 
         <button
-          className="btn btn-primary"
-          onClick={agregarItemPresupuesto}
-        >
-          + Agregar material
-        </button>
+    className="btn btn-green"
+    onClick={agregarItemPresupuesto}
+  >
+    + Material
+  </button>
+
+  <button
+    className="btn btn-purple"
+    onClick={agregarItemEspecial}
+  >
+    + Pedido especial
+  </button>
 
       </div>
 
@@ -3152,80 +4734,197 @@ const materialesFiltrados = useMemo(() => {
 
         {(presupuestoEditando.materiales || []).map((item,idx)=>(
 
-          <div
-            className="item-row"
-            key={idx}
-          >
+  <div
+    className="item-row"
+    key={idx}
+    style={{
+      display:"flex",
+      gap:"10px",
+      alignItems:"center",
+      flexWrap:"wrap"
+    }}
+  >
 
-            <select
-              value={item.id || ""}
-              onChange={e=>
-                actualizarItemPresupuesto(
-                  idx,
-                  "id",
-                  e.target.value
-                )
-              }
-            >
+    {item.tipo === "especial" ? (
 
-              <option value="">
-                Seleccionar material
-              </option>
+      <>
 
-              {materiales.map(m=>(
+        <input
+          placeholder="Pedido especial"
+          value={item.nombre || ""}
+          style={{ flex:2 }}
+          onChange={e=>
+            actualizarItemPresupuesto(
+              idx,
+              "nombre",
+              e.target.value
+            )
+          }
+        />
 
-                <option
-                  key={m.id}
-                  value={m.id}
-                >
-                  {m.nombre}
-                </option>
+        <input
+          placeholder="Descripción"
+          value={item.descripcion || ""}
+          style={{ flex:3 }}
+          onChange={e=>
+            actualizarItemPresupuesto(
+              idx,
+              "descripcion",
+              e.target.value
+            )
+          }
+        />
 
-              ))}
+        <input
+          type="number"
+          placeholder="Cant."
+          style={{ width:90 }}
+          value={item.cantidad || 1}
+          onChange={e=>
+            actualizarItemPresupuesto(
+              idx,
+              "cantidad",
+              e.target.value
+            )
+          }
+        />
 
-            </select>
+        <input
+          type="number"
+          placeholder="Precio"
+          style={{ width:120 }}
+          value={item.precio || 0}
+          onChange={e=>
+            actualizarItemPresupuesto(
+              idx,
+              "precio",
+              e.target.value
+            )
+          }
+        />
 
-            <input
-              type="number"
-              placeholder="Cant."
-              style={{ width:80 }}
-              value={item.cantidad || 1}
-              onChange={e=>
-                actualizarItemPresupuesto(
-                  idx,
-                  "cantidad",
-                  e.target.value
-                )
-              }
-            />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={async e=>{
 
-            <input
-              type="number"
-              placeholder="Precio"
-              style={{ width:110 }}
-              value={item.precio || 0}
-              onChange={e=>
-                actualizarItemPresupuesto(
-                  idx,
-                  "precio",
-                  e.target.value
-                )
-              }
-            />
+            const file =
+            e.target.files?.[0];
 
-            <button
-              className="btn btn-danger"
-              style={{ padding:"10px 14px" }}
-              onClick={()=>
-                eliminarItemPresupuesto(idx)
-              }
-            >
-              ✕
-            </button>
+            if(!file) return;
 
-          </div>
+            const url =
+            await subirImagenEspecial(file);
 
-        ))}
+            actualizarItemPresupuesto(
+              idx,
+              "imagen",
+              url
+            );
+
+          }}
+        />
+
+        {item.imagen && (
+
+  <img
+    src={item.imagen}
+    onClick={()=>
+      setImagenPreview(item.imagen)
+    }
+    style={{
+      width:80,
+      height:80,
+      objectFit:"cover",
+      borderRadius:12,
+      cursor:"pointer"
+    }}
+  />
+
+)}
+
+      </>
+
+    ) : (
+
+      <>
+
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={()=>{
+            setIndiceMaterialActual(idx);
+            setModalBuscarMaterial(true);
+          }}
+        >
+          {item.nombre
+            ? item.nombre
+            : "Buscar material"}
+        </button>
+
+        {item.imagen && (
+
+  <img
+    src={item.imagen}
+    onClick={() =>
+      setImagenPreview(item.imagen)
+    }
+    style={{
+      width:80,
+      height:80,
+      objectFit:"cover",
+      borderRadius:12,
+      cursor:"pointer"
+    }}
+  />
+
+)}
+
+        <input
+          type="number"
+          placeholder="Cant."
+          style={{ width:90 }}
+          value={item.cantidad || 1}
+          onChange={e=>
+            actualizarItemPresupuesto(
+              idx,
+              "cantidad",
+              e.target.value
+            )
+          }
+        />
+
+        <input
+          type="number"
+          placeholder="Precio"
+          style={{ width:120 }}
+          value={item.precio || 0}
+          onChange={e=>
+            actualizarItemPresupuesto(
+              idx,
+              "precio",
+              e.target.value
+            )
+          }
+        />
+
+      </>
+
+    )}
+
+    <button
+      className="btn btn-danger"
+      style={{ padding:"10px 14px" }}
+      onClick={()=>
+        eliminarItemPresupuesto(idx)
+      }
+    >
+      ✕
+    </button>
+
+  </div>
+
+))}
 
       </div>
 
@@ -3490,6 +5189,412 @@ const materialesFiltrados = useMemo(() => {
 
 )}
 
+
+
+
+{/* ── MODAL DETALLE PRESUPUESTO ── */}
+
+{modalDetallePresupuesto && (
+
+  <div
+    className="modal"
+    onClick={()=>
+      setModalDetallePresupuesto(null)
+    }
+  >
+
+    <div
+      className="modal-box"
+      style={{
+        maxWidth:"900px",
+        maxHeight:"85vh",
+        overflowY:"auto"
+      }}
+      onClick={e=>
+        e.stopPropagation()
+      }
+    >
+
+      <div className="flex-between">
+
+        <div>
+
+          <div
+            style={{
+              fontSize:"26px",
+              fontWeight:"900"
+            }}
+          >
+            {modalDetallePresupuesto.cliente}
+          </div>
+
+          <div
+            style={{
+              opacity:.7,
+              marginTop:4
+            }}
+          >
+            Evento:
+            {" "}
+            {modalDetallePresupuesto.fecha}
+          </div>
+
+        </div>
+
+        <button
+          className="btn btn-danger"
+          onClick={()=>
+            setModalDetallePresupuesto(null)
+          }
+        >
+          ✕
+        </button>
+
+      </div>
+
+      {/* MATERIALES */}
+
+      <div
+        style={{
+          marginTop:30
+        }}
+      >
+
+        <div className="section-title">
+          Materiales
+        </div>
+
+        {(modalDetallePresupuesto.materiales || []).length === 0 ? (
+
+          <div className="empty">
+            Sin materiales
+          </div>
+
+        ) : (
+
+          <div
+            style={{
+              display:"flex",
+              flexDirection:"column",
+              gap:"10px"
+            }}
+          >
+
+            {(modalDetallePresupuesto.materiales || []).map((m,idx)=>(
+
+              <div
+                key={idx}
+                style={{
+                  display:"flex",
+                  alignItems:"center",
+                  gap:"15px",
+                  padding:"12px",
+                  border:"1px solid #eee",
+                  borderRadius:"12px"
+                }}
+              >
+
+                {m.imagen && (
+
+                  <img
+                    src={m.imagen}
+                    onClick={()=>
+                      setImagenPreview(m.imagen)
+                    }
+                    style={{
+                      width:70,
+                      height:70,
+                      objectFit:"cover",
+                      borderRadius:"12px",
+                      cursor:"pointer"
+                    }}
+                  />
+
+                )}
+
+                <div style={{flex:1}}>
+
+                  <div
+                    style={{
+                      fontWeight:800
+                    }}
+                  >
+                    {m.nombre}
+                  </div>
+
+                  <div>
+                    Cantidad:
+                    {" "}
+                    {m.cantidad}
+                  </div>
+
+                </div>
+
+                <div
+                  style={{
+                    fontWeight:800
+                  }}
+                >
+                  $
+                  {Number(
+                    m.precio || 0
+                  ).toLocaleString()}
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
+      {/* COLABORADORES */}
+
+      <div
+        style={{
+          marginTop:35
+        }}
+      >
+
+        <div className="section-title">
+          Colaboradores
+        </div>
+
+        {(modalDetallePresupuesto.colaboradores || []).length === 0 ? (
+
+          <div className="empty">
+            Sin colaboradores
+          </div>
+
+        ) : (
+
+          <div
+            style={{
+              display:"flex",
+              flexDirection:"column",
+              gap:"10px"
+            }}
+          >
+
+            {(modalDetallePresupuesto.colaboradores || []).map((c,idx)=>(
+
+              <div
+                key={idx}
+                style={{
+                  display:"flex",
+                  justifyContent:"space-between",
+                  padding:"12px",
+                  border:"1px solid #eee",
+                  borderRadius:"12px"
+                }}
+              >
+
+                <div>
+                  {c.nombre}
+                </div>
+
+                <div>
+                  {c.cantidad}x
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
+      {/* EMPRESAS */}
+
+      <div
+        style={{
+          marginTop:35
+        }}
+      >
+
+        <div className="section-title">
+          Empresas
+        </div>
+
+        {(modalDetallePresupuesto.proveedores || []).length === 0 ? (
+
+          <div className="empty">
+            Sin empresas
+          </div>
+
+        ) : (
+
+          <div
+            style={{
+              display:"flex",
+              flexDirection:"column",
+              gap:"10px"
+            }}
+          >
+
+            {(modalDetallePresupuesto.proveedores || []).map((e,idx)=>(
+
+              <div
+                key={idx}
+                style={{
+                  display:"flex",
+                  justifyContent:"space-between",
+                  padding:"12px",
+                  border:"1px solid #eee",
+                  borderRadius:"12px"
+                }}
+              >
+
+                <div>
+                  {e.nombre}
+                </div>
+
+                <div>
+                  {e.cantidad}x
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
+      <div
+        style={{
+          marginTop:30,
+          textAlign:"right",
+          fontSize:"24px",
+          fontWeight:"900",
+          color:"#b98558"
+        }}
+      >
+        Total: $
+        {Number(
+          modalDetallePresupuesto.total || 0
+        ).toLocaleString()}
+      </div>
+
+    </div>
+
+  </div>
+
+)}
+
+
+
+
+{modalAgregarMaterialKarina && (
+
+<div
+  className="modalOverlay"
+  onClick={()=>
+    setModalAgregarMaterialKarina(false)
+  }
+>
+
+  <div
+    className="modalContent"
+    onClick={e=>e.stopPropagation()}
+    style={{
+      maxWidth:500
+    }}
+  >
+
+    <h2>
+      Agregar Material
+    </h2>
+
+    <div
+      style={{
+        marginBottom:20,
+        fontWeight:700
+      }}
+    >
+      {materialSeleccionadoKarina?.nombre}
+    </div>
+
+    <label>
+      Cantidad
+    </label>
+
+    <input
+      type="number"
+      min="1"
+      value={cantidadKarina}
+      onChange={e=>
+        setCantidadKarina(
+          e.target.value
+        )
+      }
+      className="input"
+    />
+
+    <label
+      style={{
+        marginTop:15,
+        display:"block"
+      }}
+    >
+      Precio
+    </label>
+
+    <input
+      type="number"
+      value={precioKarina}
+      onChange={e=>
+        setPrecioKarina(
+          e.target.value
+        )
+      }
+      className="input"
+    />
+
+    <div
+      style={{
+        marginTop:20,
+        display:"flex",
+        gap:10,
+        justifyContent:"flex-end"
+      }}
+    >
+
+      <button
+        className="btn"
+        onClick={()=>
+          setModalAgregarMaterialKarina(false)
+        }
+      >
+        Cancelar
+      </button>
+
+      <button
+        className="btn btn-green"
+        onClick={
+          confirmarAgregarMaterialKarina
+        }
+      >
+        Agregar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
+
+
         {/* MODAL CHECKLIST */}
         {modalChecklist && presupuestoChecklist && (
           <div className="modal" onClick={() => setModalChecklist(false)}>
@@ -3618,6 +5723,48 @@ const materialesFiltrados = useMemo(() => {
               <input value={colaboradorEditando.telefono} onChange={e => setColaboradorEditando({ ...colaboradorEditando, telefono: e.target.value })} />
               <label>Rol</label>
               <input value={colaboradorEditando.rol} onChange={e => setColaboradorEditando({ ...colaboradorEditando, rol: e.target.value })} />
+<label className="field-label">
+  DNI
+</label>
+
+<input
+  type="text"
+  value={colaboradorEditando.dni || ""}
+  onChange={e=>
+    setColaboradorEditando({
+      ...colaboradorEditando,
+      dni:e.target.value
+    })
+  }
+  placeholder="DNI..."
+  style={{
+    width:"100%",
+    padding:"12px"
+  }}
+/>
+
+<label
+  className="field-label"
+  style={{marginTop:"12px"}}
+>
+  CUIL
+</label>
+
+<input
+  type="text"
+  value={colaboradorEditando.cuil || ""}
+  onChange={e=>
+    setColaboradorEditando({
+      ...colaboradorEditando,
+      cuil:e.target.value
+    })
+  }
+  placeholder="CUIL..."
+  style={{
+    width:"100%",
+    padding:"12px"
+  }}
+/>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 28 }}>
                 <button className="btn btn-ghost" onClick={() => setModalColaborador(false)}>Cancelar</button>
                 <button className="btn btn-primary" onClick={guardarColaborador}>Guardar</button>
@@ -3985,6 +6132,111 @@ const materialesFiltrados = useMemo(() => {
             </div>
           </div>
         )}
+
+
+{modalKarinaBuscar && (
+
+<div
+  className="modalOverlay"
+  onClick={()=>
+    setModalKarinaBuscar(false)
+  }
+>
+
+  <div
+    className="modalContent"
+    style={{maxWidth:900}}
+    onClick={e=>e.stopPropagation()}
+  >
+
+    <div className="title">
+      Seleccionar Presupuesto
+    </div>
+
+    <input
+      className="input"
+      placeholder="Buscar cliente..."
+      value={busquedaKarina}
+      onChange={e=>
+        setBusquedaKarina(
+          e.target.value
+        )
+      }
+    />
+
+    <div
+      style={{
+        marginTop:20,
+        display:"flex",
+        flexDirection:"column",
+        gap:12
+      }}
+    >
+
+      {presupuestos
+
+      .sort((a,b)=>
+        new Date(b.fecha) -
+        new Date(a.fecha)
+      )
+
+      .filter(p=>
+
+        (p.cliente||"")
+        .toLowerCase()
+        .includes(
+          busquedaKarina.toLowerCase()
+        )
+
+      )
+
+      .map(p=>(
+
+        <div
+          key={p.id}
+          className="card"
+          style={{
+            display:"flex",
+            justifyContent:"space-between",
+            alignItems:"center"
+          }}
+        >
+
+          <div>
+
+            <div className="cliente">
+              {p.cliente}
+            </div>
+
+            <div>
+              {p.fecha}
+            </div>
+
+          </div>
+
+          <button
+            className="btn btn-green"
+            onClick={()=>
+              seleccionarPresupuestoKarina(p)
+            }
+          >
+            Seleccionar
+          </button>
+
+        </div>
+
+      ))}
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
+
+
+
 
         {/* PREVIEW IMAGEN */}
         {imagenPreview && (
