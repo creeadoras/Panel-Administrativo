@@ -1,6 +1,6 @@
 {
-  "name": "Eventos",
-  "short_name": "Eventos",
+  "name": "Panel Administrativo",
+  "short_name": "Panel Administrativo",
   "description": "Gestión de eventos y materiales",
   "start_url": "./",
   "display": "standalone",
