@@ -417,113 +417,74 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function App() {
-
-  const [installPrompt, setInstallPrompt] = useState(null);
-
-  const [modalDetallePresupuesto, setModalDetallePresupuesto] = useState(null);
-
-  const [busquedaArchivados, setBusquedaArchivados] = useState("");
-  const [fechaDesdeArchivados, setFechaDesdeArchivados] = useState("");
-  const [fechaHastaArchivados, setFechaHastaArchivados] = useState("");
-
-  const [busquedaMaterial, setBusquedaMaterial] = useState("");
-  const [busquedaMaterialKarina, setBusquedaMaterialKarina] = useState("");
-
-  const [modalAgregarMaterialKarina, setModalAgregarMaterialKarina] = useState(false);
-  const [materialSeleccionadoKarina, setMaterialSeleccionadoKarina] = useState(null);
-  const [cantidadKarina, setCantidadKarina] = useState(1);
-  const [precioKarina, setPrecioKarina] = useState(0);
-
-  const [modalBuscarMaterial, setModalBuscarMaterial] = useState(false);
-  const [indiceMaterialActual, setIndiceMaterialActual] = useState(null);
-
-  const [busquedaMaterialModal, setBusquedaMaterialModal] = useState("");
-  const [resultadosMaterialModal, setResultadosMaterialModal] = useState([]);
-
-  const [modalPresupuesto, setModalPresupuesto] = useState(false);
-  const [presupuestoEditando, setPresupuestoEditando] = useState(null);
-
-  const [calendarMonth, setCalendarMonth] = useState(() => {
+  // 1. ESTADOS
+  const [installPrompt, setInstallPrompt] = React.useState(null);
+  const [modalDetallePresupuesto, setModalDetallePresupuesto] = React.useState(null);
+  const [busquedaArchivados, setBusquedaArchivados] = React.useState("");
+  const [fechaDesdeArchivados, setFechaDesdeArchivados] = React.useState("");
+  const [fechaHastaArchivados, setFechaHastaArchivados] = React.useState("");
+  const [busquedaMaterial, setBusquedaMaterial] = React.useState("");
+  const [busquedaMaterialKarina, setBusquedaMaterialKarina] = React.useState("");
+  const [modalAgregarMaterialKarina, setModalAgregarMaterialKarina] = React.useState(false);
+  const [materialSeleccionadoKarina, setMaterialSeleccionadoKarina] = React.useState(null);
+  const [cantidadKarina, setCantidadKarina] = React.useState(1);
+  const [precioKarina, setPrecioKarina] = React.useState(0);
+  const [modalBuscarMaterial, setModalBuscarMaterial] = React.useState(false);
+  const [indiceMaterialActual, setIndiceMaterialActual] = React.useState(null);
+  const [busquedaMaterialModal, setBusquedaMaterialModal] = React.useState("");
+  const [resultadosMaterialModal, setResultadosMaterialModal] = React.useState([]);
+  const [modalPresupuesto, setModalPresupuesto] = React.useState(false);
+  const [presupuestoEditando, setPresupuestoEditando] = React.useState(null);
+  const [calendarMonth, setCalendarMonth] = React.useState(() => {
     const hoy = new Date();
     return new Date(hoy.getFullYear(), hoy.getMonth(), 1);
   });
+  const [section, setSection] = React.useState("dashboard");
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [presupuestos, setPresupuestos] = React.useState([]);
+  const [materiales, setMateriales] = React.useState([]);
+  const [colaboradores, setColaboradores] = React.useState([]);
+  const [proveedores, setProveedores] = React.useState([]);
+  const [presupuestosFormales, setPresupuestosFormales] = React.useState([]);
+  const [eventosCalendario, setEventosCalendario] = React.useState([]);
+  const [busqueda, setBusqueda] = React.useState("");
+  const [busquedaFormal, setBusquedaFormal] = React.useState("");
+  const [modalChecklist, setModalChecklist] = React.useState(false);
+  const [presupuestoChecklist, setPresupuestoChecklist] = React.useState(null);
+  const [modalMaterial, setModalMaterial] = React.useState(false);
+  const [materialEditando, setMaterialEditando] = React.useState(null);
+  const [modalColaborador, setModalColaborador] = React.useState(false);
+  const [colaboradorEditando, setColaboradorEditando] = React.useState({ nombre: "", telefono: "", email: "", dni: "", cuil: "" });
+  const [modalProveedor, setModalProveedor] = React.useState(false);
+  const [proveedorEditando, setProveedorEditando] = React.useState(null);
+  const [modalFormal, setModalFormal] = React.useState(false);
+  const [formalEditando, setFormalEditando] = React.useState(null);
+  const [modalImportar, setModalImportar] = React.useState(false);
+  const [modalKarinaBuscar, setModalKarinaBuscar] = React.useState(false);
+  const [busquedaKarina, setBusquedaKarina] = React.useState("");
+  const [presupuestoKarina, setPresupuestoKarina] = React.useState(null);
+  const [materialesKarina, setMaterialesKarina] = React.useState([]);
+  const [modalEventosFecha, setModalEventosFecha] = React.useState(false);
+  const [eventosFecha, setEventosFecha] = React.useState([]);
+  const [imagenPreview, setImagenPreview] = React.useState(null);
 
-  const [section, setSection] = useState("dashboard");
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  // Data
-  const [presupuestos, setPresupuestos] = useState([]);
-  const [materiales, setMateriales] = useState([]);
-  const [colaboradores, setColaboradores] = useState([]);
-  const [proveedores, setProveedores] = useState([]);
-  const [presupuestosFormales, setPresupuestosFormales] = useState([]);
-  const [eventosCalendario, setEventosCalendario] = useState([]);
-
-  // Búsquedas
-  const [busqueda, setBusqueda] = useState("");
-  const [busquedaFormal, setBusquedaFormal] = useState("");
-
-  // Modales
-  const [modalChecklist, setModalChecklist] = useState(false);
-  const [presupuestoChecklist, setPresupuestoChecklist] = useState(null);
-
-  const [modalMaterial, setModalMaterial] = useState(false);
-  const [materialEditando, setMaterialEditando] = useState(null);
-
-  const [modalColaborador, setModalColaborador] = useState(false);
-  const [colaboradorEditando, setColaboradorEditando] = useState({
-    nombre: "",
-    telefono: "",
-    email: "",
-    dni: "",
-    cuil: ""
-  });
-
-  const [modalProveedor, setModalProveedor] = useState(false);
-  const [proveedorEditando, setProveedorEditando] = useState(null);
-
-  const [modalFormal, setModalFormal] = useState(false);
-  const [formalEditando, setFormalEditando] = useState(null);
-
-  const [modalImportar, setModalImportar] = useState(false);
-
-  const [modalKarinaBuscar, setModalKarinaBuscar] = useState(false);
-  const [busquedaKarina, setBusquedaKarina] = useState("");
-  const [presupuestoKarina, setPresupuestoKarina] = useState(null);
-  const [materialesKarina, setMaterialesKarina] = useState([]);
-
-  const [modalEventosFecha, setModalEventosFecha] = useState(false);
-  const [eventosFecha, setEventosFecha] = useState([]);
-
-  const [imagenPreview, setImagenPreview] = useState(null);
-
-  // ======================
-  // EFFECTS (CORREGIDOS)
-  // ======================
-
-  useEffect(() => {
+  // 2. EFFECTS
+  React.useEffect(() => {
     cargarTodo();
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (section !== "dashboard") return;
-
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const el = document.getElementById("calendar");
       if (!el) return;
-
       el.innerHTML = "";
-
       const cal = new FullCalendar.Calendar(el, {
         initialView: "dayGridMonth",
         locale: "es",
         height: "auto",
         events: eventosCalendario,
-        headerToolbar: {
-          left: "prev,next today",
-          center: "title",
-          right: "dayGridMonth,timeGridWeek"
-        },
+        headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek" },
         eventClick(info) {
           const fecha = info.event.startStr;
           setEventosFecha(presupuestos.filter(p => p.fecha === fecha));
@@ -534,57 +495,46 @@ function App() {
           setModalEventosFecha(true);
         }
       });
-
       cal.render();
     }, 100);
+    return () => clearTimeout(timer);
   }, [section, eventosCalendario, presupuestos]);
 
-  // 🔥 BÚSQUEDA MATERIAL MODAL (ARREGLADO)
-  useEffect(() => {
+  React.useEffect(() => {
     const texto = busquedaMaterialModal.trim().toLowerCase();
-
-    if (!texto) {
-      setResultadosMaterialModal([]);
-      return;
-    }
-
-    const encontrados = materiales
-      .filter(m =>
-        (m.nombre || "").toLowerCase().includes(texto)
-      )
-      .slice(0, 20);
-
+    if (!texto) { setResultadosMaterialModal([]); return; }
+    const encontrados = materiales.filter(m => (m.nombre || "").toLowerCase().includes(texto)).slice(0, 20);
     setResultadosMaterialModal(encontrados);
   }, [busquedaMaterialModal, materiales]);
 
-  // 📲 PWA INSTALL PROMPT (ARREGLADO)
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-
+  React.useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener("beforeinstallprompt", handler);
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handler);
-    };
+    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  // ======================
-  // FUNCTIONS
-  // ======================
-
+  // 3. FUNCTIONS
   async function instalarApp() {
     if (!installPrompt) return;
-
     installPrompt.prompt();
-    await installPrompt.userChoice;
- 
+    const { outcome } = await installPrompt.userChoice;
+    console.log(`User choice: ${outcome}`);
+    setInstallPrompt(null);
+  
 
+  const cargarTodo = async () => {
+    // Lógica de carga aquí
+  };
+
+  // 4. RENDER
   return (
-    <div>
-      {/* tu JSX acá */}
+    <div className="min-h-screen bg-gray-100">
+      {/* Contenido de tu interfaz */}
+      {installPrompt && (
+        <button onClick={instalarApp} className="fixed bottom-4 right-4 bg-blue-600 text-white p-4 rounded-full shadow-lg">
+          Instalar App
+        </button>
+      )}
     </div>
   );
 }
@@ -6281,26 +6231,7 @@ if ("serviceWorker" in navigator) {
 
 }
 
-<script type="text/babel">
-  // --- AL FINAL DE TU SCRIPT DE BABEL ---
-
-// 1. Definimos una función para renderizar
-function iniciarApp() {
-  const rootElement = document.getElementById("root");
-  if (rootElement) {
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(<App />);
-  }
-}
-
-// 2. Usamos el evento 'DOMContentLoaded' para asegurar que el DOM existe
-// y verificamos que React esté totalmente cargado en el objeto 'window'
-if (window.React && window.ReactDOM) {
-  window.addEventListener('DOMContentLoaded', iniciarApp);
-} else {
-  // Si por latencia de red aún no cargó, esperamos al evento 'load' total
-  window.addEventListener('load', iniciarApp);
-}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
 </html>
