@@ -6281,7 +6281,18 @@ if ("serviceWorker" in navigator) {
 
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+<script type="text/babel">
+  // ... todo tu código de componentes App, funciones, etc. ...
+
+  // REEMPLAZA LA ÚLTIMA LÍNEA POR ESTO:
+  window.addEventListener('load', () => {
+    const rootElement = document.getElementById('root');
+    if (window.React && window.ReactDOM) {
+      ReactDOM.createRoot(rootElement).render(<App />);
+    } else {
+      console.error("React o ReactDOM no cargaron correctamente.");
+    }
+  });
 </script>
 </body>
 </html>
