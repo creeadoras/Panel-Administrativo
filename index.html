@@ -11,6 +11,19 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#b98558">
+
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<meta name="apple-mobile-web-app-title" content="Eventos">
+
+<link rel="apple-touch-icon" href="logo192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
@@ -405,6 +418,9 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function App() {
 
+const [installPrompt,setInstallPrompt] =
+useState(null);
+
 const [modalDetallePresupuesto,setModalDetallePresupuesto] = useState(null);
 
 const [busquedaArchivados,setBusquedaArchivados] = useState("");
@@ -553,6 +569,33 @@ useEffect(()=>{
     return;
   }
 
+
+useEffect(()=>{
+
+  const handler = e=>{
+
+    e.preventDefault();
+
+    setInstallPrompt(e);
+
+  };
+
+  window.addEventListener(
+    "beforeinstallprompt",
+    handler
+  );
+
+  return ()=>{
+
+    window.removeEventListener(
+      "beforeinstallprompt",
+      handler
+    );
+
+  };
+
+},[]);
+
   const encontrados =
   materiales
     .filter(m=>
@@ -570,6 +613,19 @@ useEffect(()=>{
   busquedaMaterialModal,
   materiales
 ]);
+
+
+async function instalarApp(){
+
+  if(!installPrompt){
+    return;
+  }
+
+  installPrompt.prompt();
+
+  await installPrompt.userChoice;
+
+}
 
 
 async function cargarFuenteTTF(doc,url,nombreFuente){
@@ -2991,6 +3047,12 @@ const materialesFiltrados = useMemo(() => {
                   <div className="title">Dashboard</div>
                   <div className="subtitle">Estadísticas generales</div>
                 </div>
+<button
+    className="btn btn-green"
+    onClick={instalarApp}
+  >
+    📲 Instalar App
+  </button>
               </div>
             </div>
 
@@ -6250,6 +6312,17 @@ Disponible para esta fecha:
       </div>
     </div>
   );
+}
+
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener("load", ()=>{
+
+    navigator.serviceWorker
+      .register("./service-worker.js");
+
+  });
+
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
