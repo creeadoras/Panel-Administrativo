@@ -403,10 +403,60 @@ label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
   font-weight:800;
 }
 
+#webSplash{
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  background:linear-gradient(135deg,#f6f1eb,#efe4d8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:opacity .45s ease, visibility .45s ease;
+}
+
+#webSplash.splash-hide{
+  opacity:0;
+  visibility:hidden;
+}
+
+.webSplash-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+}
+
+.webSplash-logo{
+  width:160px;
+  height:160px;
+  border-radius:36px;
+  object-fit:cover;
+  background:white;
+  padding:8px;
+  box-shadow:0 18px 45px rgba(0,0,0,.18);
+}
+
+.webSplash-title{
+  font-size:26px;
+  font-weight:800;
+  color:#8a5a34;
+}
+
 
 </style>
 </head>
 <body>
+<div id="webSplash">
+  <div class="webSplash-inner">
+    <img
+      class="webSplash-logo"
+      src="https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/logo.jpg"
+      alt="Cree Adoras"
+    />
+    <div class="webSplash-title">Diseño y Producción de Eventos</div>
+  </div>
+</div>
+
 <div id="root"></div>
 <script type="text/babel">
   const { useState, useEffect, useMemo } = React;
@@ -468,6 +518,23 @@ label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
     const [imagenPreview, setImagenPreview] = useState(null);
 
     // 2. EFFECTS
+
+useEffect(() => {
+  const splash = document.getElementById("webSplash");
+
+  if (!splash) return;
+
+  const timer = setTimeout(() => {
+    splash.classList.add("splash-hide");
+
+    setTimeout(() => {
+      splash.remove();
+    }, 500);
+  }, 900);
+
+  return () => clearTimeout(timer);
+}, []);
+
     useEffect(() => {
       cargarTodo();
     }, []);
