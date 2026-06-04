@@ -409,135 +409,118 @@ label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect, useMemo } = React;
+  const { useState, useEffect, useMemo } = React;
+  const LOGO = "https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/logo.jpg";
+  const SUPABASE_URL = "https://uarfndtspaejhddcnsxc.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcmZuZHRzcGFlamhkZGNuc3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTQ4MzEsImV4cCI6MjA5NDE5MDgzMX0.25YME3yryDqttRwX4JwKpmFHMlyoHYmNn31xlX-2zWc";
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const LOGO = "https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/logo.jpg";
-const SUPABASE_URL = "https://uarfndtspaejhddcnsxc.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcmZuZHRzcGFlamhkZGNuc3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTQ4MzEsImV4cCI6MjA5NDE5MDgzMX0.25YME3yryDqttRwX4JwKpmFHMlyoHYmNn31xlX-2zWc";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  function App() {
+    // 1. ESTADOS
+    const [installPrompt, setInstallPrompt] = useState(null);
+    const [modalDetallePresupuesto, setModalDetallePresupuesto] = useState(null);
+    const [busquedaArchivados, setBusquedaArchivados] = useState("");
+    const [fechaDesdeArchivados, setFechaDesdeArchivados] = useState("");
+    const [fechaHastaArchivados, setFechaHastaArchivados] = useState("");
+    const [busquedaMaterial, setBusquedaMaterial] = useState("");
+    const [busquedaMaterialKarina, setBusquedaMaterialKarina] = useState("");
+    const [modalAgregarMaterialKarina, setModalAgregarMaterialKarina] = useState(false);
+    const [materialSeleccionadoKarina, setMaterialSeleccionadoKarina] = useState(null);
+    const [cantidadKarina, setCantidadKarina] = useState(1);
+    const [precioKarina, setPrecioKarina] = useState(0);
+    const [modalBuscarMaterial, setModalBuscarMaterial] = useState(false);
+    const [indiceMaterialActual, setIndiceMaterialActual] = useState(null);
+    const [busquedaMaterialModal, setBusquedaMaterialModal] = useState("");
+    const [resultadosMaterialModal, setResultadosMaterialModal] = useState([]);
+    const [modalPresupuesto, setModalPresupuesto] = useState(false);
+    const [presupuestoEditando, setPresupuestoEditando] = useState(null);
+    const [calendarMonth, setCalendarMonth] = useState(() => {
+      const hoy = new Date();
+      return new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    });
+    const [section, setSection] = useState("dashboard");
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [presupuestos, setPresupuestos] = useState([]);
+    const [materiales, setMateriales] = useState([]);
+    const [colaboradores, setColaboradores] = useState([]);
+    const [proveedores, setProveedores] = useState([]);
+    const [presupuestosFormales, setPresupuestosFormales] = useState([]);
+    const [eventosCalendario, setEventosCalendario] = useState([]);
+    const [busqueda, setBusqueda] = useState("");
+    const [busquedaFormal, setBusquedaFormal] = useState("");
+    const [modalChecklist, setModalChecklist] = useState(false);
+    const [presupuestoChecklist, setPresupuestoChecklist] = useState(null);
+    const [modalMaterial, setModalMaterial] = useState(false);
+    const [materialEditando, setMaterialEditando] = useState(null);
+    const [modalColaborador, setModalColaborador] = useState(false);
+    const [colaboradorEditando, setColaboradorEditando] = useState({ nombre: "", telefono: "", email: "", dni: "", cuil: "" });
+    const [modalProveedor, setModalProveedor] = useState(false);
+    const [proveedorEditando, setProveedorEditando] = useState(null);
+    const [modalFormal, setModalFormal] = useState(false);
+    const [formalEditando, setFormalEditando] = useState(null);
+    const [modalImportar, setModalImportar] = useState(false);
+    const [modalKarinaBuscar, setModalKarinaBuscar] = useState(false);
+    const [busquedaKarina, setBusquedaKarina] = useState("");
+    const [presupuestoKarina, setPresupuestoKarina] = useState(null);
+    const [materialesKarina, setMaterialesKarina] = useState([]);
+    const [modalEventosFecha, setModalEventosFecha] = useState(false);
+    const [eventosFecha, setEventosFecha] = useState([]);
+    const [imagenPreview, setImagenPreview] = useState(null);
 
-function App() {
-  // 1. ESTADOS
-  const [installPrompt, setInstallPrompt] = React.useState(null);
-  const [modalDetallePresupuesto, setModalDetallePresupuesto] = React.useState(null);
-  const [busquedaArchivados, setBusquedaArchivados] = React.useState("");
-  const [fechaDesdeArchivados, setFechaDesdeArchivados] = React.useState("");
-  const [fechaHastaArchivados, setFechaHastaArchivados] = React.useState("");
-  const [busquedaMaterial, setBusquedaMaterial] = React.useState("");
-  const [busquedaMaterialKarina, setBusquedaMaterialKarina] = React.useState("");
-  const [modalAgregarMaterialKarina, setModalAgregarMaterialKarina] = React.useState(false);
-  const [materialSeleccionadoKarina, setMaterialSeleccionadoKarina] = React.useState(null);
-  const [cantidadKarina, setCantidadKarina] = React.useState(1);
-  const [precioKarina, setPrecioKarina] = React.useState(0);
-  const [modalBuscarMaterial, setModalBuscarMaterial] = React.useState(false);
-  const [indiceMaterialActual, setIndiceMaterialActual] = React.useState(null);
-  const [busquedaMaterialModal, setBusquedaMaterialModal] = React.useState("");
-  const [resultadosMaterialModal, setResultadosMaterialModal] = React.useState([]);
-  const [modalPresupuesto, setModalPresupuesto] = React.useState(false);
-  const [presupuestoEditando, setPresupuestoEditando] = React.useState(null);
-  const [calendarMonth, setCalendarMonth] = React.useState(() => {
-    const hoy = new Date();
-    return new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-  });
-  const [section, setSection] = React.useState("dashboard");
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [presupuestos, setPresupuestos] = React.useState([]);
-  const [materiales, setMateriales] = React.useState([]);
-  const [colaboradores, setColaboradores] = React.useState([]);
-  const [proveedores, setProveedores] = React.useState([]);
-  const [presupuestosFormales, setPresupuestosFormales] = React.useState([]);
-  const [eventosCalendario, setEventosCalendario] = React.useState([]);
-  const [busqueda, setBusqueda] = React.useState("");
-  const [busquedaFormal, setBusquedaFormal] = React.useState("");
-  const [modalChecklist, setModalChecklist] = React.useState(false);
-  const [presupuestoChecklist, setPresupuestoChecklist] = React.useState(null);
-  const [modalMaterial, setModalMaterial] = React.useState(false);
-  const [materialEditando, setMaterialEditando] = React.useState(null);
-  const [modalColaborador, setModalColaborador] = React.useState(false);
-  const [colaboradorEditando, setColaboradorEditando] = React.useState({ nombre: "", telefono: "", email: "", dni: "", cuil: "" });
-  const [modalProveedor, setModalProveedor] = React.useState(false);
-  const [proveedorEditando, setProveedorEditando] = React.useState(null);
-  const [modalFormal, setModalFormal] = React.useState(false);
-  const [formalEditando, setFormalEditando] = React.useState(null);
-  const [modalImportar, setModalImportar] = React.useState(false);
-  const [modalKarinaBuscar, setModalKarinaBuscar] = React.useState(false);
-  const [busquedaKarina, setBusquedaKarina] = React.useState("");
-  const [presupuestoKarina, setPresupuestoKarina] = React.useState(null);
-  const [materialesKarina, setMaterialesKarina] = React.useState([]);
-  const [modalEventosFecha, setModalEventosFecha] = React.useState(false);
-  const [eventosFecha, setEventosFecha] = React.useState([]);
-  const [imagenPreview, setImagenPreview] = React.useState(null);
+    // 2. EFFECTS
+    useEffect(() => {
+      cargarTodo();
+    }, []);
 
-  // 2. EFFECTS
-  React.useEffect(() => {
-    cargarTodo();
-  }, []);
+    useEffect(() => {
+      const handler = (e) => {
+        e.preventDefault();
+        setInstallPrompt(e);
+      };
 
-  React.useEffect(() => {
-    if (section !== "dashboard") return;
-    const timer = setTimeout(() => {
-      const el = document.getElementById("calendar");
-      if (!el) return;
-      el.innerHTML = "";
-      const cal = new FullCalendar.Calendar(el, {
-        initialView: "dayGridMonth",
-        locale: "es",
-        height: "auto",
-        events: eventosCalendario,
-        headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek" },
-        eventClick(info) {
-          const fecha = info.event.startStr;
-          setEventosFecha(presupuestos.filter(p => p.fecha === fecha));
-          setModalEventosFecha(true);
-        },
-        dateClick(info) {
-          setEventosFecha(presupuestos.filter(p => p.fecha === info.dateStr));
-          setModalEventosFecha(true);
-        }
-      });
-      cal.render();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [section, eventosCalendario, presupuestos]);
+      window.addEventListener("beforeinstallprompt", handler);
+      return () => window.removeEventListener("beforeinstallprompt", handler);
+    }, []);
 
-  React.useEffect(() => {
-    const texto = busquedaMaterialModal.trim().toLowerCase();
-    if (!texto) { setResultadosMaterialModal([]); return; }
-    const encontrados = materiales.filter(m => (m.nombre || "").toLowerCase().includes(texto)).slice(0, 20);
-    setResultadosMaterialModal(encontrados);
-  }, [busquedaMaterialModal, materiales]);
+    useEffect(() => {
+      if (section !== "dashboard") return;
 
-  React.useEffect(() => {
-    const handler = (e) => { e.preventDefault(); setInstallPrompt(e); };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+      let cal = null;
+      const timer = setTimeout(() => {
+        const el = document.getElementById("calendar");
+        if (!el) return;
 
-  // 3. FUNCTIONS
-  async function instalarApp() {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    console.log(`User choice: ${outcome}`);
-    setInstallPrompt(null);
+        el.innerHTML = "";
+        cal = new FullCalendar.Calendar(el, {
+          initialView: "dayGridMonth",
+          locale: "es",
+          events: eventosCalendario,
+          eventClick(info) {
+            const fecha = info.event.startStr;
+            setEventosFecha(presupuestos.filter(p => p.fecha === fecha));
+            setModalEventosFecha(true);
+          }
+        });
+
+        cal.render();
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+        if (cal) cal.destroy();
+      };
+    }, [section, eventosCalendario, presupuestos]);
+
+
+    // 3. FUNCTIONS
+    async function instalarApp() {
+      if (!installPrompt) return;
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      setInstallPrompt(null);
+    }
+
   
-
-  const cargarTodo = async () => {
-    // Lógica de carga aquí
-  };
-
-  // 4. RENDER
-  return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Contenido de tu interfaz */}
-      {installPrompt && (
-        <button onClick={instalarApp} className="fixed bottom-4 right-4 bg-blue-600 text-white p-4 rounded-full shadow-lg">
-          Instalar App
-        </button>
-      )}
-    </div>
-  );
-}
 
 
 async function cargarFuenteTTF(doc,url,nombreFuente){
@@ -573,7 +556,7 @@ async function cargarFuenteTTF(doc,url,nombreFuente){
 
 async function cambiarEstadoPresupuesto(p, estado){
 
-if(nuevoEstado === "aceptado"){
+if(estado === "aceptado"){
 
   for(const mat of p.materiales || []){
 
@@ -1495,105 +1478,51 @@ if(res.error){
 
 
 
-async function guardarKarina(){
+async function guardarKarina() {
+  if (!presupuestoKarina) return;
 
-  if(!presupuestoKarina){
-    return;
-  }
+  const materialesActuales = presupuestoKarina.materiales || [];
+  const checklistActual = presupuestoKarina.checklist || [];
 
-  const materialesActuales =
-  presupuestoKarina.materiales || [];
-
-  const checklistActual =
-  presupuestoKarina.checklist || [];
-
-  const checklistNuevo =
-  materialesActuales.map(item=>{
-
-    const label =
-    `${item.cantidad}x ${item.nombre}`;
-
-    const existente =
-    checklistActual.find(ch=>
-      ch.material_id &&
-      String(ch.material_id) === String(item.id)
-    ) ||
-    checklistActual.find(ch=>
-      ch.label === label
+  const checklistNuevo = materialesActuales.map(item => {
+    // Buscamos prioritariamente por ID si existe, es más seguro que el label
+    const existente = checklistActual.find(ch => 
+      ch.material_id && String(ch.material_id) === String(item.id)
     );
 
     return {
-
-      id:
-        existente?.id ||
-        `m-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-
-      material_id:
-        item.id,
-
-      label,
-
-      ready:
-        existente?.ready || false,
-
-      comentario:
-        existente?.comentario || "",
-
-      cargado:
-        existente?.cargado || false,
-
-      enviado:
-        existente?.enviado ||
-        Number(item.cantidad || 1),
-
-      recibido:
-        existente?.recibido || "",
-
-      regreso_ok:
-        existente?.regreso_ok || false,
-
-      regreso_detalle:
-        existente?.regreso_detalle || "",
-
-      stock_devuelto:
-        existente?.stock_devuelto || false
-
+      id: existente?.id || `m-${crypto.randomUUID()}`, // Usa crypto.randomUUID() si el navegador lo soporta
+      material_id: item.id,
+      label: `${item.cantidad}x ${item.nombre}`,
+      ready: existente?.ready || false,
+      comentario: existente?.comentario || "",
+      cargado: existente?.cargado || false,
+      enviado: Number(item.cantidad || 1),
+      recibido: existente?.recibido || "",
+      regreso_ok: existente?.regreso_ok || false,
+      regreso_detalle: existente?.regreso_detalle || "",
+      stock_devuelto: existente?.stock_devuelto || false
     };
-
   });
 
-  const { error } =
-  await db
-  .from("presupuestos")
-  .update({
+  try {
+    const { error } = await db
+      .from("presupuestos")
+      .update({
+        materiales: materialesActuales,
+        checklist: checklistNuevo
+      })
+      .eq("id", presupuestoKarina.id);
 
-    materiales:
-    materialesActuales,
+    if (error) throw error;
 
-    checklist:
-    checklistNuevo
-
-  })
-  .eq(
-    "id",
-    presupuestoKarina.id
-  );
-
-  if(error){
-
-    alert(error.message);
-    return;
-
+    alert("Materiales actualizados correctamente");
+    await cargarTodo();
+  } catch (err) {
+    console.error("Error al guardar:", err);
+    alert("Hubo un error al guardar: " + err.message);
   }
-
-  alert(
-    "Materiales actualizados"
-  );
-
-  await cargarTodo();
-
 }
-
 
 
 function fechaKey(fecha){
@@ -6221,17 +6150,21 @@ Disponible para esta fecha:
 }
 
 if ("serviceWorker" in navigator) {
-
-  window.addEventListener("load", ()=>{
-
-    navigator.serviceWorker
-      .register("./service-worker.js");
-
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(console.error);
   });
-
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+
+
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js");
+    });
+  }
 </script>
 </body>
 </html>
