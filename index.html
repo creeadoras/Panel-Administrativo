@@ -4383,105 +4383,106 @@ Disponible para esta fecha:
 
 
 {modalBuscarMaterial && (
-
-<div
-  style={{
-    position:"fixed",
-    inset:0,
-    background:"rgba(0,0,0,.75)",
-    display:"flex",
-    alignItems:"center",
-    justifyContent:"center",
-    padding:"20px",
-    zIndex:12000
-  }}
->
-
   <div
-    className="modal-box"
-    style={{maxWidth:"900px"}}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,.75)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+      zIndex: 12000
+    }}
+    onClick={() => setModalBuscarMaterial(false)}
   >
+    <div
+      className="modal-box"
+      style={{ maxWidth: "900px" }}
+      onClick={e => e.stopPropagation()}
+    >
+      <div className="flex-between">
+        <div className="section-title">Buscar material</div>
 
-    <div className="section-title">
-      Buscar material
-    </div>
-
-    <input
-      placeholder="Escribí nombre..."
-      value={busquedaMaterialModal}
-      onChange={e=>
-        setBusquedaMaterialModal(
-          e.target.value
-        )
-      }
-    />
-
-    {busquedaMaterialModal && (
-
-      <div
-        style={{
-          marginTop:20,
-          display:"grid",
-          gridTemplateColumns:
-          "repeat(auto-fill,minmax(220px,1fr))",
-          gap:14
-        }}
-      >
-
-        {resultadosMaterialModal.map(m=>(
-
-          <div
-            key={m.id}
-            className="card"
-            style={{
-              cursor:"pointer"
-            }}
-            onClick={()=>
-              seleccionarMaterial(m)
-            }
-          >
-
-            {m.imagen && (
-
-              <img
-                src={m.imagen}
-                style={{
-                  width:"100%",
-                  height:180,
-                  objectFit:"cover",
-                  borderRadius:16
-                }}
-              />
-
-            )}
-
-            <div
-              style={{
-                marginTop:10,
-                fontWeight:800
-              }}
-            >
-              {m.nombre}
-            </div>
-
-            <div>
-              ${Number(
-                m.precio || 0
-              ).toLocaleString()}
-            </div>
-
-          </div>
-
-        ))}
-
+        <button
+          type="button"
+          className="btn btn-danger"
+          onClick={() => setModalBuscarMaterial(false)}
+        >
+          Cerrar
+        </button>
       </div>
 
-    )}
+      <input
+        placeholder="Escribi nombre..."
+        value={busquedaMaterialModal}
+        autoFocus
+        onChange={e => {
+          const texto = e.target.value;
+          const normalizado = texto.trim().toLowerCase();
 
+          setBusquedaMaterialModal(texto);
+
+          if (!normalizado) {
+            setResultadosMaterialModal([]);
+            return;
+          }
+
+          const resultados = materiales.filter(m =>
+            String(m.nombre || "").toLowerCase().includes(normalizado)
+          );
+
+          setResultadosMaterialModal(resultados);
+        }}
+      />
+
+      {busquedaMaterialModal.trim() && resultadosMaterialModal.length === 0 && (
+        <div className="empty" style={{ marginTop: 20 }}>
+          No se encontraron materiales con ese nombre
+        </div>
+      )}
+
+      {resultadosMaterialModal.length > 0 && (
+        <div
+          style={{
+            marginTop: 20,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
+            gap: 14
+          }}
+        >
+          {resultadosMaterialModal.map(m => (
+            <div
+              key={m.id}
+              className="card"
+              style={{ cursor: "pointer" }}
+              onClick={() => seleccionarMaterial(m)}
+            >
+              {m.imagen && (
+                <img
+                  src={m.imagen}
+                  style={{
+                    width: "100%",
+                    height: 180,
+                    objectFit: "cover",
+                    borderRadius: 16
+                  }}
+                />
+              )}
+
+              <div style={{ marginTop: 10, fontWeight: 800 }}>
+                {m.nombre}
+              </div>
+
+              <div>
+                ${Number(m.precio || 0).toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   </div>
-
-</div>
-
 )}
 
 
@@ -4747,17 +4748,17 @@ Disponible para esta fecha:
       <>
 
         <button
-          type="button"
-          className="btn btn-primary"
-          onClick={()=>{
-            setIndiceMaterialActual(idx);
-            setModalBuscarMaterial(true);
-          }}
-        >
-          {item.nombre
-            ? item.nombre
-            : "Buscar material"}
-        </button>
+  type="button"
+  className="btn btn-primary"
+  onClick={() => {
+    setIndiceMaterialActual(idx);
+    setBusquedaMaterialModal("");
+    setResultadosMaterialModal([]);
+    setModalBuscarMaterial(true);
+  }}
+>
+  {item.nombre ? item.nombre : "Buscar material"}
+</button>
 
         {item.imagen && (
 
