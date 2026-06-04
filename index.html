@@ -1485,13 +1485,12 @@ async function guardarKarina() {
   const checklistActual = presupuestoKarina.checklist || [];
 
   const checklistNuevo = materialesActuales.map(item => {
-    // Buscamos prioritariamente por ID si existe, es más seguro que el label
-    const existente = checklistActual.find(ch => 
+    const existente = checklistActual.find(ch =>
       ch.material_id && String(ch.material_id) === String(item.id)
     );
 
     return {
-      id: existente?.id || `m-${crypto.randomUUID()}`, // Usa crypto.randomUUID() si el navegador lo soporta
+      id: existente?.id || `m-${crypto.randomUUID()}`,
       material_id: item.id,
       label: `${item.cantidad}x ${item.nombre}`,
       ready: existente?.ready || false,
@@ -1516,8 +1515,19 @@ async function guardarKarina() {
 
     if (error) throw error;
 
-    alert("Materiales actualizados correctamente");
     await cargarTodo();
+
+    setPresupuestoKarina(null);
+    setMaterialSeleccionadoKarina(null);
+    setCantidadKarina(1);
+    setPrecioKarina(0);
+    setBusquedaKarina("");
+    setBusquedaMaterialKarina("");
+    setMaterialesKarina([]);
+    setModalAgregarMaterialKarina(false);
+    setModalKarinaBuscar(false);
+
+    alert("Materiales actualizados correctamente");
   } catch (err) {
     console.error("Error al guardar:", err);
     alert("Hubo un error al guardar: " + err.message);
