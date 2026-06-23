@@ -458,7 +458,14 @@ label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
 </div>
 
 <div id="root"></div>
-<script type="text/babel">
+
+<script>
+Babel.registerPreset("classic-react", {
+  presets: [[Babel.availablePresets.react, { runtime: "classic" }]]
+});
+</script>
+
+<script type="text/babel" data-presets="classic-react">
   const { useState, useEffect, useMemo } = React;
   const LOGO = "https://uarfndtspaejhddcnsxc.supabase.co/storage/v1/object/public/imagenes/logo.jpg";
   const SUPABASE_URL = "https://uarfndtspaejhddcnsxc.supabase.co";
@@ -6227,22 +6234,28 @@ Disponible para esta fecha:
   );
 }
 
-if ("serviceWorker" in navigator) {
+if (
+  "serviceWorker" in navigator &&
+  window.location.protocol !== "file:"
+) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch(console.error);
+    navigator.serviceWorker
+    .register("./service-worker.js")
+    .catch(error=>{
+      console.warn(
+        "No se pudo registrar el service worker:",
+        error
+      );
+    });
   });
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = ReactDOM.createRoot(
+  document.getElementById("root")
+);
+
 root.render(<App />);
 
-
-
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js");
-    });
-  }
 </script>
 </body>
 </html>
