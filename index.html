@@ -39,6 +39,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135de
 .nav-btn.active{background:linear-gradient(135deg,#ffffff,#f5ede4);color:#8a5a34;box-shadow:0 10px 25px rgba(0,0,0,.12);}
 .content{flex:1;margin-left:290px;padding:34px;display:flex;flex-direction:column;gap:24px;}
 .mobileHeader{display:none;align-items:center;justify-content:space-between;margin-bottom:20px;}
+
+.sidebar-backdrop{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:999;
+}
 .mobileMenuBtn,.mobileClose{border:none;background:rgba(255,255,255,.08);color:white;width:46px;height:46px;border-radius:14px;cursor:pointer;font-size:20px;}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;}
@@ -56,7 +64,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135de
 .btn-white{background:rgba(255,255,255,.9);color:#2d241f;border:1px solid rgba(185,133,88,.22);}
 .btn-ghost{background:rgba(255,255,255,.5);color:#2d241f;border:1px solid rgba(185,133,88,.18);}
 .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
-.input,input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,select{width:100%;border:none;background:rgba(255,255,255,.92);color:#2d241f;padding:15px;border-radius:16px;margin-top:8px;outline:none;border:1px solid rgba(200,155,109,.18);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;}
+.input,input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,select{width:100%;border:none;background:rgba(255,255,255,.92);color:#2d241f;padding:15px;border-radius:16px;margin-top:8px;outline:none;border:1px solid rgba(200,155,109,.18);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;}
 textarea{resize:vertical;}
 label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
 .modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999;}
@@ -237,6 +245,7 @@ label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
   .title{font-size:24px;}
   .grid{grid-template-columns:1fr;}
   .topbar{flex-direction:column;align-items:flex-start;}
+  .sidebar-backdrop{display:block;}
 }
 @media(max-width:640px){
   .presupuesto-header{flex-direction:column;}
@@ -257,6 +266,123 @@ label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
   .actions{flex-direction:column;}
   .title{font-size:22px;}
   .cliente{font-size:19px;}
+}
+
+@media(max-width:680px){
+
+  /* Modales a pantalla completa: patrón estándar de apps móviles */
+  .modal,.modalOverlay{
+    padding:0;
+  }
+
+  .modal-box,.modalContent{
+    max-width:100%;
+    width:100%;
+    height:100%;
+    max-height:100%;
+    border-radius:0;
+  }
+
+  /* Filas de ítems (materiales/colaboradores/empresas) apiladas */
+  .item-row{
+    grid-template-columns:1fr;
+  }
+
+  .item-row input,
+  .item-row select,
+  .item-row button{
+    width:100% !important;
+  }
+
+  /* Topbar: buscadores y botones a ancho completo */
+  .topbar input,
+  .topbar select{
+    width:100% !important;
+  }
+
+  .topbar > div{
+    width:100%;
+  }
+
+  /* Calendario: celdas compactas, solo número + cantidad de eventos */
+  .calendar-day{
+    min-height:52px;
+    padding:6px;
+    border-radius:12px;
+  }
+
+  .calendar-number{
+    font-size:13px;
+  }
+
+  .calendar-event{
+    display:none;
+  }
+
+  .calendar-day-count{
+    display:block;
+    font-size:10px;
+    font-weight:800;
+    color:#b98558;
+    background:rgba(185,133,88,.14);
+    border-radius:999px;
+    padding:2px 6px;
+    margin-top:4px;
+    text-align:center;
+  }
+
+  .calendar-weekday{
+    font-size:10px;
+    padding:6px 0;
+  }
+
+  .calendar-month{
+    gap:4px;
+  }
+
+  .calendar-header{
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .calendar-header .btn{
+    width:auto;
+    padding:10px 14px;
+    font-size:13px;
+  }
+
+  /* Tarjetas de estadísticas del dashboard, una sola columna */
+  .stats{
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .stat{
+    padding:18px 16px;
+    border-radius:20px;
+  }
+
+  /* Sidebar como cajón a pantalla completa en celulares muy chicos */
+  .sidebar{
+    width:82%;
+    max-width:320px;
+  }
+
+  /* Botones de acciones administrativas, a ancho completo y apilados */
+  .admin-actions{
+    flex-direction:column;
+    width:100%;
+  }
+
+  .admin-actions button{
+    width:100%;
+  }
+
+  /* Evita que las tarjetas con mini-badges se corten */
+  .admin-info{
+    gap:8px;
+  }
+
 }
 
 .presupuesto-actions-modern{
@@ -327,6 +453,11 @@ label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
   background:#fffaf5;
   padding:10px;
   text-align:left;
+  cursor:pointer;
+}
+
+.calendar-day-count{
+  display:none;
 }
 
 .calendar-day.empty{
@@ -2695,6 +2826,12 @@ const materialesFiltrados = useMemo(() => {
     <div className="app">
 
       {/* SIDEBAR */}
+      {menuOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
       <div className={`sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-top">
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -2836,17 +2973,33 @@ const materialesFiltrados = useMemo(() => {
       presupuestos.filter(p=>fechaKey(p.fecha) === key);
 
       return(
-        <div className="calendar-day" key={key}>
+        <div
+          className="calendar-day"
+          key={key}
+          onClick={()=>{
+            if(eventosDia.length === 0) return;
+            setEventosFecha(eventosDia);
+            setModalEventosFecha(true);
+          }}
+        >
 
           <div className="calendar-number">
             {dia}
           </div>
 
+          {eventosDia.length > 0 && (
+            <div className="calendar-day-count">
+              {eventosDia.length}{" "}
+              {eventosDia.length === 1 ? "evento" : "eventos"}
+            </div>
+          )}
+
           {eventosDia.map(p=>(
             <button
               className="calendar-event"
               key={p.id}
-              onClick={()=>{
+              onClick={e=>{
+                e.stopPropagation();
                 setEventosFecha([p]);
                 setModalEventosFecha(true);
               }}
