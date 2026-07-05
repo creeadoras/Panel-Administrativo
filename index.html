@@ -7,7 +7,6 @@
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -58,7 +57,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135de
 .btn-white{background:rgba(255,255,255,.9);color:#2d241f;border:1px solid rgba(185,133,88,.22);}
 .btn-ghost{background:rgba(255,255,255,.5);color:#2d241f;border:1px solid rgba(185,133,88,.18);}
 .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
-.input,textarea,select{width:100%;border:none;background:rgba(255,255,255,.92);color:#2d241f;padding:15px;border-radius:16px;margin-top:8px;outline:none;border:1px solid rgba(200,155,109,.18);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;}
+.input,input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,select{width:100%;border:none;background:rgba(255,255,255,.92);color:#2d241f;padding:15px;border-radius:16px;margin-top:8px;outline:none;border:1px solid rgba(200,155,109,.18);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;}
 textarea{resize:vertical;}
 label{font-size:13px;font-weight:700;opacity:.7;display:block;margin-top:14px;}
 .modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999;}
@@ -502,7 +501,6 @@ Babel.registerPreset("classic-react", {
     const [colaboradores, setColaboradores] = useState([]);
     const [proveedores, setProveedores] = useState([]);
     const [presupuestosFormales, setPresupuestosFormales] = useState([]);
-    const [eventosCalendario, setEventosCalendario] = useState([]);
     const [busqueda, setBusqueda] = useState("");
     const [busquedaFormal, setBusquedaFormal] = useState("");
     const [modalChecklist, setModalChecklist] = useState(false);
@@ -519,7 +517,6 @@ Babel.registerPreset("classic-react", {
     const [modalKarinaBuscar, setModalKarinaBuscar] = useState(false);
     const [busquedaKarina, setBusquedaKarina] = useState("");
     const [presupuestoKarina, setPresupuestoKarina] = useState(null);
-    const [materialesKarina, setMaterialesKarina] = useState([]);
     const [modalEventosFecha, setModalEventosFecha] = useState(false);
     const [eventosFecha, setEventosFecha] = useState([]);
     const [imagenPreview, setImagenPreview] = useState(null);
@@ -555,35 +552,6 @@ useEffect(() => {
       window.addEventListener("beforeinstallprompt", handler);
       return () => window.removeEventListener("beforeinstallprompt", handler);
     }, []);
-
-    useEffect(() => {
-      if (section !== "dashboard") return;
-
-      let cal = null;
-      const timer = setTimeout(() => {
-        const el = document.getElementById("calendar");
-        if (!el) return;
-
-        el.innerHTML = "";
-        cal = new FullCalendar.Calendar(el, {
-          initialView: "dayGridMonth",
-          locale: "es",
-          events: eventosCalendario,
-          eventClick(info) {
-            const fecha = info.event.startStr;
-            setEventosFecha(presupuestos.filter(p => p.fecha === fecha));
-            setModalEventosFecha(true);
-          }
-        });
-
-        cal.render();
-      }, 100);
-
-      return () => {
-        clearTimeout(timer);
-        if (cal) cal.destroy();
-      };
-    }, [section, eventosCalendario, presupuestos]);
 
 
     // 3. FUNCTIONS
@@ -746,109 +714,6 @@ function seleccionarPresupuestoKarina(p){
 }
 
 
-function toggleProveedorPresupuesto(proveedor){
-
-  setPresupuestoEditando(prev=>{
-
-    const actuales =
-    prev.proveedores || [];
-
-    const existe =
-    actuales.some(e=>
-      String(e.id) === String(proveedor.id)
-    );
-
-    return {
-      ...prev,
-      proveedores:existe
-      ? actuales.filter(e=>
-          String(e.id) !== String(proveedor.id)
-        )
-      : [
-          ...actuales,
-          {
-            id:proveedor.id,
-            nombre:proveedor.nombre,
-            servicio:proveedor.servicio || "",
-            telefono:proveedor.telefono || "",
-            presente:false
-          }
-        ]
-    };
-
-  });
-
-}
-
-
-function toggleColaboradorPresupuesto(colaborador){
-
-  setPresupuestoEditando(prev=>{
-
-    const actuales =
-    prev.colaboradores || [];
-
-    const existe =
-    actuales.some(c=>
-      String(c.id) === String(colaborador.id)
-    );
-
-    return {
-      ...prev,
-      colaboradores:existe
-      ? actuales.filter(c=>
-          String(c.id) !== String(colaborador.id)
-        )
-      : [
-          ...actuales,
-          {
-            id:colaborador.id,
-            nombre:colaborador.nombre,
-            rol:colaborador.rol || "",
-            telefono:colaborador.telefono || ""
-          }
-        ]
-    };
-
-  });
-
-}
-
-function toggleEmpresaPresupuesto(empresa){
-
-  setPresupuestoEditando(prev=>{
-
-    const actuales =
-    prev.empresas || [];
-
-    const existe =
-    actuales.some(e=>
-      String(e.id) === String(empresa.id)
-    );
-
-    return {
-      ...prev,
-      empresas:existe
-      ? actuales.filter(e=>
-          String(e.id) !== String(empresa.id)
-        )
-      : [
-          ...actuales,
-          {
-            id:empresa.id,
-            nombre:empresa.nombre,
-            servicio:empresa.servicio || "",
-            telefono:empresa.telefono || "",
-            presente:false
-          }
-        ]
-    };
-
-  });
-
-}
-
-
 function actualizarCampoPresupuesto(campo,valor){
 
   setPresupuestoEditando(prev=>({
@@ -858,37 +723,35 @@ function actualizarCampoPresupuesto(campo,valor){
 
 }
 
-function agregarItemPresupuesto() {
+function agregarItemPresupuesto(){
 
-  setPresupuestoEditando(prev => {
+  const nuevoIndice =
+  (presupuestoEditando.materiales || []).length;
 
-    const materiales = [...(prev.materiales || [])];
+  setPresupuestoEditando(prev=>({
+    ...prev,
+    materiales:[
+      ...(prev.materiales || []),
+      {
+        tipo:"material",
+        id:"",
+        nombre:"",
+        imagen:"",
+        cantidad:1,
+        precio:0
+      }
+    ]
+  }));
 
-    const nuevoIndice = materiales.length;
+  setIndiceMaterialActual(nuevoIndice);
 
-    materiales.push({
-      tipo: "material",
-      id: "",
-      nombre: "",
-      imagen: "",
-      cantidad: 1,
-      precio: 0
-    });
+  setBusquedaMaterialModal("");
 
-    setIndiceMaterialActual(nuevoIndice);
-    setBusquedaMaterialModal("");
-    setResultadosMaterialModal([]);
-    setModalBuscarMaterial(true);
+  setResultadosMaterialModal([]);
 
-    return {
-      ...prev,
-      materiales
-    };
-
-  });
+  setModalBuscarMaterial(true);
 
 }
-
 
 function agregarItemEspecial(){
 
@@ -944,41 +807,43 @@ async function subirImagenEspecial(file){
 }
 
 
-function seleccionarMaterial(material) {
+function seleccionarMaterial(material){
 
-  setPresupuestoEditando(prev => {
+//  actualizarItemPresupuesto(
+//    indiceMaterialActual,
+//    "id",
+//    material.id
+//  );
 
-    if (!prev) return prev;
+  setPresupuestoEditando(prev=>{
 
-    const indice = Number(indiceMaterialActual);
+    const items =
+    [...(prev.materiales || [])];
 
-    const items = Array.isArray(prev.materiales)
-      ? [...prev.materiales]
-      : [];
+    items[indiceMaterialActual] = {
 
-    if (
-      Number.isNaN(indice) ||
-      indice < 0 ||
-      indice >= items.length
-    ) {
-      console.error("Índice de material inválido:", indiceMaterialActual);
-      return prev;
-    }
+      ...items[indiceMaterialActual],
 
-    items[indice] = {
-      ...(items[indice] || {}),
-      tipo: "material",
-      id: material?.id ?? "",
-      nombre: material?.nombre ?? "",
-      imagen: material?.imagen ?? "",
-      cantidad: items[indice]?.cantidad || 1,
-      precio: Number(material?.precio ?? 0)
+      tipo:"material",
+
+      id:material.id,
+
+      nombre:material.nombre,
+
+      imagen:material.imagen || "",
+
+      cantidad:1,
+
+      precio:Number(
+        material.precio || 0
+      )
+
     };
 
     return {
       ...prev,
-      materiales: items,
-      total: recalcularTotalPresupuesto(
+      materiales:items,
+      total:recalcularTotalPresupuesto(
         items,
         prev.colaboradores || [],
         prev.proveedores || []
@@ -990,7 +855,6 @@ function seleccionarMaterial(material) {
   setModalBuscarMaterial(false);
 
 }
-
 
 
 function actualizarItemPresupuesto(idx,campo,valor){
@@ -1172,34 +1036,6 @@ function confirmarAgregarMaterialKarina(){
 
 }
 
-
-function actualizarCantidadKarina(
-  idx,
-  cantidad
-){
-
-  setPresupuestoKarina(prev=>{
-
-    const copia = {
-      ...prev
-    };
-
-    copia.materiales =
-    [...copia.materiales];
-
-    copia.materiales[idx] = {
-
-      ...copia.materiales[idx],
-
-      cantidad:Number(cantidad)
-
-    };
-
-    return copia;
-
-  });
-
-}
 
 
 
@@ -1598,7 +1434,6 @@ async function guardarKarina() {
     setPrecioKarina(0);
     setBusquedaKarina("");
     setBusquedaMaterialKarina("");
-    setMaterialesKarina([]);
     setModalAgregarMaterialKarina(false);
     setModalKarinaBuscar(false);
 
@@ -1740,12 +1575,6 @@ async function archivarPresupuesto(p){
       if (mRes.data) setMateriales(mRes.data);
       if (pRes.data) {
         setPresupuestos(pRes.data);
-        setEventosCalendario(pRes.data.map(p => ({
-          id: p.id,
-          title: `${p.cliente || "Evento"} • ${p.estado || "Pendiente"}`,
-          start: p.fecha,
-          allDay: true
-        })));
       }
       if (cRes.data) setColaboradores(cRes.data);
       if (pvRes.data) setProveedores(pvRes.data);
@@ -1758,66 +1587,6 @@ async function archivarPresupuesto(p){
 function actualizarPresupuestoLocal(id,cambios){
 
   setPresupuestos(prev=>
-    prev.map(p=>
-      p.id === id
-      ? {
-          ...p,
-          ...cambios
-        }
-      : p
-    )
-  );
-
-}
-
-function actualizarMaterialLocal(id,cambios){
-
-  setMateriales(prev=>
-    prev.map(m=>
-      m.id === id
-      ? {
-          ...m,
-          ...cambios
-        }
-      : m
-    )
-  );
-
-}
-
-function actualizarProveedorLocal(id,cambios){
-
-  setProveedores(prev=>
-    prev.map(p=>
-      p.id === id
-      ? {
-          ...p,
-          ...cambios
-        }
-      : p
-    )
-  );
-
-}
-
-function actualizarColaboradorLocal(id,cambios){
-
-  setColaboradores(prev=>
-    prev.map(c=>
-      c.id === id
-      ? {
-          ...c,
-          ...cambios
-        }
-      : c
-    )
-  );
-
-}
-
-function actualizarFormalLocal(id,cambios){
-
-  setPresupuestosFormales(prev=>
     prev.map(p=>
       p.id === id
       ? {
@@ -1903,184 +1672,63 @@ function actualizarFormalLocal(id,cambios){
 }
 
   async function exportarPDF(p) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
-
-  const MARGEN_SUP = 20;
-  const MARGEN_INF = 280;
-
-  let y = MARGEN_SUP;
-  let logo = null;
-
-  try {
-    logo = await getBase64(LOGO);
-  } catch (e) {}
-
-  function nuevaPagina() {
-    doc.addPage();
-    encabezado();
-  }
-
-  function verificarEspacio(alto = 8) {
-    if (y + alto > MARGEN_INF) {
-      nuevaPagina();
-    }
-  }
-
-  function encabezado() {
-    y = 20;
-
-    if (logo) {
-      try {
-        doc.addImage(logo, "JPEG", 14, 10, 26, 26);
-      } catch {}
-    }
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(24);
-    doc.text("PRESUPUESTO", 14, 45);
-
-    doc.setFont("helvetica", "normal");
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
+    try {
+      const b64 = await getBase64(LOGO);
+      doc.addImage(b64, "JPEG", 14, 10, 26, 26);
+    } catch {}
+    y = 45;
+    doc.setFontSize(24); doc.text("PRESUPUESTO", 14, y); y += 20;
     doc.setFontSize(12);
+    doc.text(`Cliente: ${p.cliente}`, 14, y); y += 10;
+    doc.text(`Fecha: ${p.fecha || "-"}`, 14, y); y += 20;
+    doc.setFontSize(14);
+doc.text("Materiales", 14, y);
+y += 10;
 
-    y = 65;
+doc.setFontSize(11);
+(p.materiales || []).forEach(m => {
+  doc.text(`${m.cantidad || 1}x ${m.nombre || "-"}`, 20, y);
+  y += 8;
+});
 
-    doc.text(`Cliente: ${p.cliente || "-"}`, 14, y);
-    y += 10;
+const totalColaboradores =
+(p.colaboradores || []).reduce((sum,c)=>
+  sum + Number(c.cantidad || 0),
+  0
+);
 
-    doc.text(`Fecha: ${p.fecha || "-"}`, 14, y);
-    y += 15;
-  }
-
-  encabezado();
-
-  // MATERIALes
-
-  doc.setFont("helvetica", "bold");
+if(totalColaboradores > 0){
+  y += 8;
   doc.setFontSize(14);
-  doc.text("Materiales", 14, y);
+  doc.text("Colaboradores", 14, y);
   y += 10;
 
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-
-  (p.materiales || []).forEach((m) => {
-
-    verificarEspacio();
-
-    doc.text(
-      `${m.cantidad || 1}x ${m.nombre || "-"}`,
-      20,
-      y
-    );
-
-    y += 8;
-
-  });
-
-  // COLABORADORES
-
-  const totalColaboradores =
-    (p.colaboradores || []).reduce(
-      (s, c) => s + Number(c.cantidad || 0),
-      0
-    );
-
-  if (totalColaboradores > 0) {
-
-    verificarEspacio(25);
-
-    y += 8;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("Colaboradores", 14, y);
-
-    y += 10;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-
-    doc.text(
-      `Cantidad total: ${totalColaboradores}`,
-      20,
-      y
-    );
-
-    y += 8;
-  }
-
-  // EMPRESAS
-
-  if ((p.proveedores || []).length > 0) {
-
-    verificarEspacio(25);
-
-    y += 8;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-
-    doc.text("Empresas", 14, y);
-
-    y += 10;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-
-    (p.proveedores || []).forEach((e) => {
-
-      verificarEspacio();
-
-      doc.text(
-        `${e.cantidad || 1}x ${e.nombre || "-"}`,
-        20,
-        y
-      );
-
-      y += 8;
-
-    });
-
-  }
-
-  // TOTAL
-
-  verificarEspacio(25);
-
-  y += 15;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-
-  doc.text(
-    `TOTAL: $${Number(p.total || 0).toLocaleString("es-AR")}`,
-    14,
-    y
-  );
-
-  // NUMERACIÓN DE PÁGINAS
-
-  const paginas = doc.getNumberOfPages();
-
-  for (let i = 1; i <= paginas; i++) {
-
-    doc.setPage(i);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-
-    doc.text(
-      `Página ${i} de ${paginas}`,
-      195,
-      290,
-      { align: "right" }
-    );
-
-  }
-
-  doc.save(`Presupuesto_${p.numero || p.id}.pdf`);
+  doc.text(`Cantidad total: ${totalColaboradores}`, 20, y);
+  y += 8;
 }
+
+if((p.proveedores || []).length > 0){
+  y += 8;
+  doc.setFontSize(14);
+  doc.text("Empresas", 14, y);
+  y += 10;
+
+  doc.setFontSize(11);
+  (p.proveedores || []).forEach(e => {
+    doc.text(`${e.cantidad || 1}x ${e.nombre || "-"}`, 20, y);
+    y += 8;
+  });
+}
+
+y += 20;
+doc.setFontSize(20);
+doc.text(`TOTAL: $${Number(p.total || 0).toLocaleString()}`, 14, y);
+    doc.save(`Presupuesto_${p.numero || p.id}.pdf`);
+  }
 
   // ── MATERIALES ──
   async function guardarMaterial() {
@@ -2138,116 +1786,29 @@ function actualizarFormalLocal(id,cambios){
 
 }
 
- async function exportarMaterialesPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
-
-  const MARGEN_IZQ = 14;
-  const MARGEN_SUP = 20;
-  const MARGEN_INF = 285;
-
-  let y = MARGEN_SUP;
-
-  function dibujarEncabezado() {
-    y = MARGEN_SUP;
-
+  async function exportarMaterialesPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
     try {
-      if (logoBase64) {
-        doc.addImage(logoBase64, "JPEG", 14, 10, 24, 24);
-      }
+      const b64 = await getBase64(LOGO);
+      doc.addImage(b64, "JPEG", 14, 10, 24, 24);
     } catch {}
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text("CONTROL GENERAL DE INVENTARIO", 14, 22);
-
-    doc.setFont("helvetica", "normal");
+    y = 45;
+    doc.setFontSize(22); doc.text("CONTROL GENERAL DE INVENTARIO", 14, y); y += 20;
     doc.setFontSize(10);
-
-    y = 42;
-
-    doc.setDrawColor(180);
-    doc.line(14, y, 196, y);
-
-    y += 8;
-
-    doc.text("Nombre", 14, y);
-    doc.text("Stock", 90, y);
-    doc.text("Costo", 125, y);
-    doc.text("Venta", 165, y);
-
-    y += 5;
-
-    doc.line(14, y, 196, y);
-
-    y += 8;
+    doc.text("Nombre", 14, y); doc.text("Stock", 80, y); doc.text("Costo", 120, y); doc.text("Venta", 160, y);
+    y += 10;
+    materiales.forEach(m => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.text(String(m.nombre || ""), 14, y);
+      doc.text(String(m.stock || 0), 80, y);
+      doc.text(`$${Number(m.costo || 0).toLocaleString()}`, 120, y);
+      doc.text(`$${Number(m.precio || 0).toLocaleString()}`, 160, y);
+      y += 10;
+    });
+    doc.save("Inventario_General.pdf");
   }
-
-  function verificarSaltoPagina() {
-    if (y >= MARGEN_INF) {
-      doc.addPage();
-      dibujarEncabezado();
-    }
-  }
-
-  let logoBase64 = null;
-
-  try {
-    logoBase64 = await getBase64(LOGO);
-  } catch (e) {}
-
-  dibujarEncabezado();
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-
-  materiales.forEach((m) => {
-
-    verificarSaltoPagina();
-
-    doc.text(String(m.nombre ?? ""), 14, y);
-
-    doc.text(
-      String(m.stock ?? 0),
-      90,
-      y,
-      { align: "right" }
-    );
-
-    doc.text(
-      "$" + Number(m.costo ?? 0).toLocaleString("es-AR"),
-      125,
-      y,
-      { align: "right" }
-    );
-
-    doc.text(
-      "$" + Number(m.precio ?? 0).toLocaleString("es-AR"),
-      165,
-      y,
-      { align: "right" }
-    );
-
-    y += 8;
-  });
-
-  const paginas = doc.getNumberOfPages();
-
-  for (let i = 1; i <= paginas; i++) {
-    doc.setPage(i);
-
-    doc.setFontSize(9);
-
-    doc.text(
-      `Página ${i} de ${paginas}`,
-      195,
-      290,
-      { align: "right" }
-    );
-  }
-
-  doc.save("Inventario_General.pdf");
-}
 
   // ── COLABORADORES ──
   async function guardarColaborador() {
@@ -3106,7 +2667,7 @@ const materialesFiltrados = useMemo(() => {
     String(m.stock || "").includes(t) ||
     String(m.costo || "").includes(t) ||
     String(m.precio || "").includes(t)
-  );
+  ).slice(0, 60);
 
 }, [materiales,busquedaMaterial]);
 
@@ -3182,6 +2743,11 @@ const materialesFiltrados = useMemo(() => {
                   <div className="subtitle">Estadísticas generales</div>
                 </div>
               </div>
+              {installPrompt && (
+                <button className="btn btn-green" onClick={instalarApp}>
+                  📲 Instalar App
+                </button>
+              )}
             </div>
 
             <div className="stats">
@@ -3939,6 +3505,8 @@ const materialesFiltrados = useMemo(() => {
   .localeCompare(b.nombre || "")
 )
 
+.slice(0, 60)
+
 .map(mat=>(
 
       <div
@@ -3948,6 +3516,8 @@ const materialesFiltrados = useMemo(() => {
 
         <img
   src={mat.imagen}
+  loading="lazy"
+  decoding="async"
   onClick={()=>
     setImagenPreview(mat.imagen)
   }
@@ -4507,6 +4077,8 @@ Disponible para esta fecha:
                     <img
                       src={mat.imagen || "https://placehold.co/600x400?text=Sin+Imagen"}
                       onError={e => { e.target.src = "https://placehold.co/600x400?text=Sin+Imagen"; }}
+                      loading="lazy"
+                      decoding="async"
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   </div>
@@ -4709,35 +4281,37 @@ Disponible para esta fecha:
       <input
         placeholder="Escribi nombre..."
         value={busquedaMaterialModal}
-        autoFocus={window.innerWidth > 900}
+        autoFocus
         onChange={e => {
           const texto = e.target.value;
           const normalizado = texto.trim().toLowerCase();
 
           setBusquedaMaterialModal(texto);
 
-          if (!normalizado) {
+          if (!normalizado || normalizado.length < 2) {
             setResultadosMaterialModal([]);
             return;
           }
 
-          const lista = Array.isArray(materiales)
-    ? materiales
-    : [];
-
-const resultados = lista.filter(m =>
-    String(m?.nombre ?? "")
-        .toLowerCase()
-        .includes(normalizado)
-);
+          const resultados = materiales
+            .filter(m =>
+              String(m.nombre || "").toLowerCase().includes(normalizado)
+            )
+            .slice(0, 40);
 
           setResultadosMaterialModal(resultados);
         }}
       />
 
-      {(busquedaMaterialModal || "").trim() && resultadosMaterialModal.length === 0 && (
+      {busquedaMaterialModal.trim() && resultadosMaterialModal.length === 0 && (
         <div className="empty" style={{ marginTop: 20 }}>
           No se encontraron materiales con ese nombre
+        </div>
+      )}
+
+      {busquedaMaterialModal.trim().length > 0 && busquedaMaterialModal.trim().length < 2 && (
+        <div className="empty" style={{ marginTop: 20 }}>
+          Escribí al menos 2 letras para buscar
         </div>
       )}
 
@@ -4752,7 +4326,7 @@ const resultados = lista.filter(m =>
         >
           {resultadosMaterialModal.map(m => (
             <div
-	    key={m.id || m.nombre}
+              key={m.id}
               className="card"
               style={{ cursor: "pointer" }}
               onClick={() => seleccionarMaterial(m)}
@@ -4760,6 +4334,8 @@ const resultados = lista.filter(m =>
               {m.imagen && (
                 <img
                   src={m.imagen}
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     width: "100%",
                     height: 180,
@@ -6468,23 +6044,6 @@ if (
 const root = ReactDOM.createRoot(
   document.getElementById("root")
 );
-
-
-window.onerror = function (msg, url, line, col, err) {
-  alert(
-    "ERROR:\n\n" +
-    msg +
-    "\n\nLínea: " + line +
-    "\nColumna: " + col
-  );
-
-  console.error(err || msg);
-};
-
-window.onunhandledrejection = function (e) {
-  alert("PROMESA:\n\n" + (e.reason?.stack || e.reason?.message || e.reason));
-  console.error(e.reason);
-};
 
 root.render(<App />);
 
