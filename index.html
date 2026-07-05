@@ -858,35 +858,37 @@ function actualizarCampoPresupuesto(campo,valor){
 
 }
 
-function agregarItemPresupuesto(){
+function agregarItemPresupuesto() {
 
-  const nuevoIndice =
-  (presupuestoEditando.materiales || []).length;
+  setPresupuestoEditando(prev => {
 
-  setPresupuestoEditando(prev=>({
-    ...prev,
-    materiales:[
-      ...(prev.materiales || []),
-      {
-        tipo:"material",
-        id:"",
-        nombre:"",
-        imagen:"",
-        cantidad:1,
-        precio:0
-      }
-    ]
-  }));
+    const materiales = [...(prev.materiales || [])];
 
-  setIndiceMaterialActual(nuevoIndice);
+    const nuevoIndice = materiales.length;
 
-  setBusquedaMaterialModal("");
+    materiales.push({
+      tipo: "material",
+      id: "",
+      nombre: "",
+      imagen: "",
+      cantidad: 1,
+      precio: 0
+    });
 
-  setResultadosMaterialModal([]);
+    setIndiceMaterialActual(nuevoIndice);
+    setBusquedaMaterialModal("");
+    setResultadosMaterialModal([]);
+    setModalBuscarMaterial(true);
 
-  setModalBuscarMaterial(true);
+    return {
+      ...prev,
+      materiales
+    };
+
+  });
 
 }
+
 
 function agregarItemEspecial(){
 
@@ -942,43 +944,41 @@ async function subirImagenEspecial(file){
 }
 
 
-function seleccionarMaterial(material){
+function seleccionarMaterial(material) {
 
-//  actualizarItemPresupuesto(
-//    indiceMaterialActual,
-//    "id",
-//    material.id
-//  );
+  setPresupuestoEditando(prev => {
 
-  setPresupuestoEditando(prev=>{
+    if (!prev) return prev;
 
-    const items =
-    [...(prev.materiales || [])];
+    const indice = Number(indiceMaterialActual);
 
-    items[indiceMaterialActual] = {
+    const items = Array.isArray(prev.materiales)
+      ? [...prev.materiales]
+      : [];
 
-      ...items[indiceMaterialActual],
+    if (
+      Number.isNaN(indice) ||
+      indice < 0 ||
+      indice >= items.length
+    ) {
+      console.error("Índice de material inválido:", indiceMaterialActual);
+      return prev;
+    }
 
-      tipo:"material",
-
-      id:material.id,
-
-      nombre:material.nombre,
-
-      imagen:material.imagen || "",
-
-      cantidad:1,
-
-      precio:Number(
-        material.precio || 0
-      )
-
+    items[indice] = {
+      ...(items[indice] || {}),
+      tipo: "material",
+      id: material?.id ?? "",
+      nombre: material?.nombre ?? "",
+      imagen: material?.imagen ?? "",
+      cantidad: items[indice]?.cantidad || 1,
+      precio: Number(material?.precio ?? 0)
     };
 
     return {
       ...prev,
-      materiales:items,
-      total:recalcularTotalPresupuesto(
+      materiales: items,
+      total: recalcularTotalPresupuesto(
         items,
         prev.colaboradores || [],
         prev.proveedores || []
@@ -990,6 +990,7 @@ function seleccionarMaterial(material){
   setModalBuscarMaterial(false);
 
 }
+
 
 
 function actualizarItemPresupuesto(idx,campo,valor){
@@ -6467,6 +6468,23 @@ if (
 const root = ReactDOM.createRoot(
   document.getElementById("root")
 );
+
+
+window.onerror = function (msg, url, line, col, err) {
+  alert(
+    "ERROR:\n\n" +
+    msg +
+    "\n\nLínea: " + line +
+    "\nColumna: " + col
+  );
+
+  console.error(err || msg);
+};
+
+window.onunhandledrejection = function (e) {
+  alert("PROMESA:\n\n" + (e.reason?.stack || e.reason?.message || e.reason));
+  console.error(e.reason);
+};
 
 root.render(<App />);
 
