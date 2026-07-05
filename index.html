@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Cree Adoras — Sistema Premium</title>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -4280,7 +4280,6 @@ Disponible para esta fecha:
       <input
         placeholder="Escribi nombre..."
         value={busquedaMaterialModal}
-        autoFocus
         onChange={e => {
           const texto = e.target.value;
           const normalizado = texto.trim().toLowerCase();
@@ -6040,11 +6039,92 @@ if (
   });
 }
 
+class ErrorBoundary extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = { error:null };
+  }
+
+  static getDerivedStateFromError(error){
+    return { error };
+  }
+
+  componentDidCatch(error, info){
+    console.error("Error atrapado por ErrorBoundary:", error, info);
+  }
+
+  render(){
+
+    if(this.state.error){
+
+      return (
+        <div style={{
+          minHeight:"100vh",
+          display:"flex",
+          flexDirection:"column",
+          alignItems:"center",
+          justifyContent:"center",
+          padding:24,
+          textAlign:"center",
+          fontFamily:"sans-serif",
+          background:"#f5ede4",
+          color:"#2d241f"
+        }}>
+
+          <div style={{ fontSize:22, fontWeight:800, marginBottom:12 }}>
+            Ocurrió un error
+          </div>
+
+          <div style={{
+            fontSize:14,
+            opacity:.8,
+            marginBottom:24,
+            maxWidth:480,
+            wordBreak:"break-word"
+          }}>
+            {String(this.state.error?.message || this.state.error)}
+          </div>
+
+          <button
+            onClick={()=>{
+              this.setState({ error:null });
+              window.location.reload();
+            }}
+            style={{
+              padding:"14px 22px",
+              borderRadius:14,
+              border:"none",
+              background:"#b98558",
+              color:"white",
+              fontWeight:700,
+              fontSize:15,
+              cursor:"pointer"
+            }}
+          >
+            Reintentar
+          </button>
+
+        </div>
+      );
+
+    }
+
+    return this.props.children;
+
+  }
+
+}
+
 const root = ReactDOM.createRoot(
   document.getElementById("root")
 );
 
-root.render(<App />);
+root.render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);
 
 </script>
 </body>
